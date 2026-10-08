@@ -9,7 +9,6 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Http\UploadedFile;
 
 class ListScreenings extends ListRecords
 {
@@ -32,6 +31,8 @@ class ListScreenings extends ListRecords
                         ->maxSize(15360) // 15 MB
                         ->disk('local')
                         ->directory('temp_uploads')
+                        ->preserveFilenames()
+                        ->storeFileNamesIn('original_filename')
                         ->required(),
                     Forms\Components\Select::make('company_id')
                         ->label('Empresa / Jornada')
@@ -45,12 +46,14 @@ class ListScreenings extends ListRecords
                 ->action(function (array $data, SpotVisionImporter $importer) {
                     try {
                         $relativeFilePath = $data['pdf_file'];
-                        $fullPath = storage_path('app/' . $relativeFilePath);
+                        $fullPath = SpotVisionImporter::resolvePath($relativeFilePath);
+                        $originalName = $data['original_filename'] ?? basename($relativeFilePath);
 
                         $screening = $importer->importPdf(
                             $fullPath,
                             $data['company_id'] ? (int)$data['company_id'] : null,
-                            $data['manual_client_name'] ?? null
+                            $data['manual_client_name'] ?? null,
+                            $originalName
                         );
 
                         Notification::make()
@@ -82,6 +85,8 @@ class ListScreenings extends ListRecords
                         ->maxSize(15360)
                         ->disk('local')
                         ->directory('temp_uploads')
+                        ->preserveFilenames()
+                        ->storeFileNamesIn('original_filenames')
                         ->required(),
                     Forms\Components\Select::make('company_id')
                         ->label('Empresa / Jornada')
@@ -91,15 +96,19 @@ class ListScreenings extends ListRecords
                 ])
                 ->action(function (array $data, SpotVisionImporter $importer) {
                     $files = (array)$data['pdf_files'];
+                    $originalNames = (array)($data['original_filenames'] ?? []);
                     $importedCount = 0;
                     $errors = [];
 
-                    foreach ($files as $filePath) {
+                    foreach ($files as $idx => $filePath) {
                         try {
-                            $fullPath = storage_path('app/' . $filePath);
+                            $fullPath = SpotVisionImporter::resolvePath($filePath);
+                            $origName = $originalNames[$idx] ?? basename($filePath);
                             $importer->importPdf(
                                 $fullPath,
-                                $data['company_id'] ? (int)$data['company_id'] : null
+                                $data['company_id'] ? (int)$data['company_id'] : null,
+                                null,
+                                $origName
                             );
                             $importedCount++;
                         } catch (\Exception $e) {

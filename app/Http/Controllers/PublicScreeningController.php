@@ -122,7 +122,7 @@ class PublicScreeningController extends Controller
     public function downloadPdf(string $uuid)
     {
         $screening = Screening::where('uuid', $uuid)->firstOrFail();
-        $filePath = storage_path('app/' . $screening->original_pdf_path);
+        $filePath = \App\Services\SpotVisionImporter::resolvePath($screening->original_pdf_path);
 
         if (!file_exists($filePath)) {
             abort(404, 'Archivo original no encontrado en el servidor.');

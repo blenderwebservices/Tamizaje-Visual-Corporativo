@@ -286,7 +286,7 @@ class ScreeningResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
                     ->action(function (Screening $record) {
-                        $fullPath = storage_path('app/' . $record->original_pdf_path);
+                        $fullPath = \App\Services\SpotVisionImporter::resolvePath($record->original_pdf_path);
                         if (file_exists($fullPath)) {
                             return response()->download($fullPath, $record->original_filename);
                         }

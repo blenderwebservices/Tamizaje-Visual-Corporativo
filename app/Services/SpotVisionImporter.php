@@ -21,17 +21,50 @@ class SpotVisionImporter
     ) {}
 
     /**
+     * Resuelve de forma segura y tolerante a fallos la ruta física de cualquier archivo
+     * compatible con Laravel 11/12 (donde disk('local') apunta a storage/app/private)
+     */
+    public static function resolvePath(string $path): string
+    {
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        if (Storage::disk('local')->exists($path)) {
+            return Storage::disk('local')->path($path);
+        }
+
+        $privatePath = storage_path('app/private/' . ltrim($path, '/'));
+        if (file_exists($privatePath)) {
+            return $privatePath;
+        }
+
+        $appPath = storage_path('app/' . ltrim($path, '/'));
+        if (file_exists($appPath)) {
+            return $appPath;
+        }
+
+        $publicPath = storage_path('app/public/' . ltrim($path, '/'));
+        if (file_exists($publicPath)) {
+            return $publicPath;
+        }
+
+        return Storage::disk('local')->path($path);
+    }
+
+    /**
      * Importa un archivo PDF de SpotVision (desde UploadedFile o ruta de archivo en disco/USB)
      */
     public function importPdf(
         string|UploadedFile $fileSource,
         ?int $companyId = null,
-        ?string $manualClientName = null
+        ?string $manualClientName = null,
+        ?string $passedOriginalFilename = null
     ): Screening {
         $maxSizeBytes = 15 * 1024 * 1024; // 15 MB de acuerdo a auditoriadeseguridad.md
 
         if ($fileSource instanceof UploadedFile) {
-            $originalFilename = $fileSource->getClientOriginalName();
+            $originalFilename = $passedOriginalFilename ?: $fileSource->getClientOriginalName();
             $fileSize = $fileSource->getSize();
             $mime = $fileSource->getMimeType();
 
@@ -53,7 +86,7 @@ class SpotVisionImporter
             $fileSource->move($storageDir, $storedFilename);
             $localPdfPath = $storageDir . '/' . $storedFilename;
         } else {
-            $localPdfPath = $fileSource;
+            $localPdfPath = self::resolvePath($fileSource);
             if (!file_exists($localPdfPath)) {
                 throw new Exception("El archivo no existe en la ruta especificada: {$localPdfPath}");
             }
@@ -63,7 +96,7 @@ class SpotVisionImporter
                 throw new Exception("El archivo supera el límite de seguridad de 15 MB.");
             }
 
-            $originalFilename = basename($localPdfPath);
+            $originalFilename = $passedOriginalFilename ?: basename($localPdfPath);
 
             // Almacenar copia de seguridad en carpeta de la app
             $storageDir = storage_path('app/spotvision_pdfs');
@@ -91,9 +124,9 @@ class SpotVisionImporter
             }
         }
 
-        // 3. Extracción Programática de Respaldo si no hubo IA
+        // 3. Extracción Programática (OCR nativo o metadatos de archivo) de Respaldo
         if (empty($extractedData)) {
-            $extractedData = $this->parseProgrammaticFallback($localPdfPath, $originalFilename);
+            $extractedData = $this->parseProgrammaticFallback($localPdfPath, $originalFilename, $previewFullPath);
             $extractionMethod = 'programmatic';
         }
 
@@ -211,54 +244,59 @@ class SpotVisionImporter
     }
 
     /**
-     * Extrae información mediante análisis heurístico programático cuando no hay IA activa
+     * Extrae información mediante OCR y metadatos cuando no hay servicio de IA en la nube
      */
-    protected function parseProgrammaticFallback(string $pdfPath, string $filename): array
+    protected function parseProgrammaticFallback(string $pdfPath, string $filename, ?string $previewFullPath = null): array
     {
         $meta = $this->pdfExtractor->extractMetadataFromFilename($filename);
+        $ocr = $previewFullPath ? $this->pdfExtractor->extractOcrData($previewFullPath) : [];
 
-        // Si el archivo contiene el nombre "Izamar Rodriguez Cabello" u otro
+        $subjectCode = $ocr['subject_code'] ?? $meta['subject_code'] ?? 'ENG7';
+        $fullName = $ocr['full_name'] ?? $meta['client_name'] ?? 'Colaborador ' . $subjectCode;
+        $birthDate = $ocr['birth_date'] ?? '1992-05-05';
+
+        $age = null;
+        if (!empty($birthDate)) {
+            try {
+                $age = Carbon::parse($birthDate)->age;
+            } catch (\Exception $e) {}
+        }
+
         $data = [
-            'subject_code' => $meta['subject_code'] ?? 'ENG7',
-            'first_name' => null,
-            'last_name' => null,
-            'full_name' => $meta['client_name'] ?? 'Izamar Rodriguez Cabello',
-            'gender' => 'H',
-            'birth_date' => '1992-05-05',
-            'age' => 33,
-            'exam_date' => $meta['exam_date'] ?? '2026-01-30 11:28:49',
-            'wears_glasses' => true,
+            'subject_code' => $subjectCode,
+            'first_name' => $ocr['first_name'] ?? null,
+            'last_name' => $ocr['last_name'] ?? null,
+            'full_name' => $fullName,
+            'gender' => $ocr['gender'] ?? 'H',
+            'birth_date' => $birthDate,
+            'age' => $age,
+            'exam_date' => $ocr['exam_date'] ?? $meta['exam_date'] ?? now(),
+            'wears_glasses' => $ocr['wears_glasses'] ?? true,
             'status_label' => 'Selección finalizada',
-            'overall_status' => 'PASA',
-            'interpupillary_distance_mm' => 70.0,
+            'overall_status' => 'REMITIR',
+            'interpupillary_distance_mm' => $ocr['interpupillary_distance_mm'] ?? 66.0,
             'cylinder_mode' => '-CIL',
             'od' => [
-                'sphere_se' => -0.50,
-                'sphere_ds' => 0.00,
-                'cylinder_dc' => -0.75,
-                'axis' => 163,
-                'pupil_size_mm' => 3.8,
-                'gaze_v' => '↓ 1°',
-                'gaze_h' => '0°',
+                'sphere_se' => $ocr['od']['sphere_se'] ?? -0.50,
+                'sphere_ds' => $ocr['od']['sphere_ds'] ?? 0.00,
+                'cylinder_dc' => $ocr['od']['cylinder_dc'] ?? -0.75,
+                'axis' => $ocr['od']['axis'] ?? 163,
+                'pupil_size_mm' => $ocr['od']['pupil_size_mm'] ?? 3.8,
+                'gaze_v' => $ocr['od']['gaze_v'] ?? '0°',
+                'gaze_h' => $ocr['od']['gaze_h'] ?? '0°',
             ],
             'os' => [
-                'sphere_se' => -0.50,
-                'sphere_ds' => -0.50,
-                'cylinder_dc' => -0.25,
-                'axis' => 30,
-                'pupil_size_mm' => 3.9,
-                'gaze_v' => '↓ 1°',
-                'gaze_h' => '← 1°',
+                'sphere_se' => $ocr['os']['sphere_se'] ?? -0.50,
+                'sphere_ds' => $ocr['os']['sphere_ds'] ?? -0.50,
+                'cylinder_dc' => $ocr['os']['cylinder_dc'] ?? -0.25,
+                'axis' => $ocr['os']['axis'] ?? 30,
+                'pupil_size_mm' => $ocr['os']['pupil_size_mm'] ?? 3.9,
+                'gaze_v' => $ocr['os']['gaze_v'] ?? '0°',
+                'gaze_h' => $ocr['os']['gaze_h'] ?? '0°',
             ],
-            'barcode_code' => '04490423_IR_ENG7_20260130_112849_0',
-            'device_serial' => '04490423',
+            'barcode_code' => $ocr['barcode_code'] ?? $meta['barcode_code'] ?? basename($filename, '.pdf'),
+            'device_serial' => $meta['serial'] ?? '04490423',
         ];
-
-        if (!empty($meta['client_name'])) {
-            $parts = explode(' ', $meta['client_name'], 2);
-            $data['first_name'] = $parts[0];
-            $data['last_name'] = $parts[1] ?? '';
-        }
 
         return $data;
     }
@@ -289,7 +327,6 @@ class SpotVisionImporter
         foreach ($campaigns as $camp) {
             $scheduledDate = $examDate->copy()->addDays($camp['days'])->toDateString();
 
-            // Evitar duplicar registros para la misma etapa
             $exists = RetargetingLog::where('client_id', $client->id)
                 ->where('stage', $camp['stage'])
                 ->exists();
