@@ -133,6 +133,22 @@ class ScreeningResource extends Resource
                                         ->label('Alineación Vertical'),
                                     Forms\Components\TextInput::make('od_gaze_h')
                                         ->label('Alineación Horizontal'),
+                                    Forms\Components\TextInput::make('od_dnp_mm')
+                                        ->label('DNP (Dist. Naso Pupilar)')
+                                        ->numeric()
+                                        ->minValue(18.0)
+                                        ->maxValue(38.5)
+                                        ->step(0.5)
+                                        ->suffix('mm')
+                                        ->helperText('Rango [18.0 .. 38.5] mm, escala 0.5'),
+                                    Forms\Components\TextInput::make('od_add')
+                                        ->label('Adición / ADD (Cerca)')
+                                        ->numeric()
+                                        ->minValue(0.75)
+                                        ->maxValue(3.50)
+                                        ->step(0.25)
+                                        ->prefix('+')
+                                        ->helperText('Rango [+0.75 .. +3.50], escala 0.25'),
                                 ])->columns(3),
 
                             Forms\Components\Section::make('Refracción Ojo Izquierdo (OS)')
@@ -159,7 +175,36 @@ class ScreeningResource extends Resource
                                         ->label('Alineación Vertical'),
                                     Forms\Components\TextInput::make('os_gaze_h')
                                         ->label('Alineación Horizontal'),
+                                    Forms\Components\TextInput::make('os_dnp_mm')
+                                        ->label('DNP (Dist. Naso Pupilar)')
+                                        ->numeric()
+                                        ->minValue(18.0)
+                                        ->maxValue(38.5)
+                                        ->step(0.5)
+                                        ->suffix('mm')
+                                        ->helperText('Rango [18.0 .. 38.5] mm, escala 0.5'),
+                                    Forms\Components\TextInput::make('os_add')
+                                        ->label('Adición / ADD (Cerca)')
+                                        ->numeric()
+                                        ->minValue(0.75)
+                                        ->maxValue(3.50)
+                                        ->step(0.25)
+                                        ->prefix('+')
+                                        ->helperText('Rango [+0.75 .. +3.50], escala 0.25'),
                                 ])->columns(3),
+
+                            Forms\Components\Section::make('Reporte Clínico de Graduación y Optometría (Enjoy Vision)')
+                                ->collapsible()
+                                ->schema([
+                                    Forms\Components\TextInput::make('optometrist_name')
+                                        ->label('Optometrista / Especialista Evaluador')
+                                        ->placeholder('Ej. Lic. Opt. Francisco / Enjoy Vision')
+                                        ->maxLength(150),
+                                    Forms\Components\Textarea::make('optometrist_notes')
+                                        ->label('Observaciones Clínicas y Notas de Graduación')
+                                        ->rows(3)
+                                        ->placeholder('Notas de adaptación, confirmación de cilindro/eje, recomendación de micas (monofocal, progresivo, etc.).'),
+                                ])->columns(1),
 
                             Forms\Components\Section::make('Análisis Rápido y Comunicación (Fase 3)')
                                 ->schema([
@@ -330,26 +375,121 @@ class ScreeningResource extends Resource
                             ->send();
                     }),
 
-                Tables\Actions\Action::make('viewDigitalReport')
-                    ->label('Reporte Digital')
-                    ->icon('heroicon-o-document-text')
-                    ->color('info')
-                    ->url(fn (Screening $record) => $record->public_report_url, shouldOpenInNewTab: true),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('viewGraduation')
+                        ->label('Ver Graduación')
+                        ->icon('heroicon-o-eye')
+                        ->color('indigo')
+                        ->url(fn (Screening $record) => $record->graduation_report_url, shouldOpenInNewTab: true),
 
-                Tables\Actions\Action::make('downloadPdf')
-                    ->label('PDF Original')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->color('gray')
-                    ->action(function (Screening $record) {
-                        $fullPath = SpotVisionImporter::resolvePath($record->original_pdf_path);
-                        if (file_exists($fullPath)) {
-                            return response()->download($fullPath, $record->original_filename);
-                        }
-                        Notification::make()
-                            ->title('Archivo no encontrado')
-                            ->danger()
-                            ->send();
-                    }),
+                    Tables\Actions\Action::make('sendGraduationWhatsApp')
+                        ->label('WhatsApp Graduación')
+                        ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                        ->color('success')
+                        ->visible(fn (Screening $record) => ! empty($record->client?->phone))
+                        ->action(function (Screening $record) {
+                            if (\App\Services\WhatsAppCloudApiService::isConfigured()) {
+                                $service = app(\App\Services\WhatsAppCloudApiService::class);
+                                $result = $service->sendGraduationReport($record);
+                                if ($result['success']) {
+                                    Notification::make()
+                                        ->title('Graduación Enviada por Enjoy Vision')
+                                        ->body($result['message'])
+                                        ->success()
+                                        ->send();
+                                    return;
+                                }
+                            }
+
+                            // Respaldo WhatsApp Web del Operador
+                            $record->update(['graduation_sent_at' => now()]);
+                            Notification::make()
+                                ->title('Abriendo WhatsApp Web')
+                                ->body('Se abrió el reporte de graduación para envío desde el navegador.')
+                                ->info()
+                                ->send();
+
+                            return redirect()->away($record->graduation_whatsapp_url);
+                        }),
+
+                    Tables\Actions\Action::make('sendGraduationEmail')
+                        ->label('Correo Graduación')
+                        ->icon('heroicon-o-envelope')
+                        ->color('warning')
+                        ->visible(fn (Screening $record) => ! empty($record->client?->email))
+                        ->form([
+                            Forms\Components\TextInput::make('email')
+                                ->label('Correo del Paciente')
+                                ->default(fn (Screening $record) => $record->client?->email)
+                                ->email()
+                                ->required(),
+                        ])
+                        ->action(function (Screening $record, array $data) {
+                            $targetEmail = $data['email'];
+                            $name = $record->client?->full_name ?? 'Paciente';
+                            $gradUrl = $record->graduation_report_url;
+
+                            try {
+                                \Illuminate\Support\Facades\Mail::html("
+                                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;'>
+                                        <div style='text-align: center; margin-bottom: 20px;'>
+                                            <h2 style='color: #4338ca; margin: 0;'>Enjoy Vision</h2>
+                                            <p style='color: #64748b; font-size: 13px; margin: 4px 0 0 0;'>Salud Visual Corporativa • Reporte Oficial de Graduación</p>
+                                        </div>
+                                        <p style='color: #1e293b; font-size: 15px;'>Hola <strong>{$name}</strong>,</p>
+                                        <p style='color: #475569; font-size: 14px;'>Te compartimos tu fórmula optométrica y prescripción clínica confirmada en tu jornada visual.</p>
+                                        <div style='text-align: center; margin: 25px 0;'>
+                                            <a href='{$gradUrl}' style='background-color: #4f46e5; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;'>
+                                                Ver tu Receta y Graduación Digital
+                                            </a>
+                                        </div>
+                                        <p style='color: #94a3b8; font-size: 12px; margin-top: 30px; text-align: center;'>Enjoy Vision • Este reporte contiene tus valores ópticos para la elaboración de tus lentes.</p>
+                                    </div>
+                                ", function ($message) use ($targetEmail, $name) {
+                                    $message->to($targetEmail)
+                                        ->subject("👓 Tu Reporte de Graduación Visual - {$name} | Enjoy Vision");
+                                });
+
+                                $record->update(['graduation_email_sent_at' => now()]);
+
+                                Notification::make()
+                                    ->title('Correo Enviado con Éxito')
+                                    ->body("Se envió la graduación a {$targetEmail}")
+                                    ->success()
+                                    ->send();
+                            } catch (\Throwable $e) {
+                                Notification::make()
+                                    ->title('Error al enviar correo')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+
+                    Tables\Actions\Action::make('viewDigitalReport')
+                        ->label('Reporte SpotVision')
+                        ->icon('heroicon-o-document-text')
+                        ->color('info')
+                        ->url(fn (Screening $record) => $record->public_report_url, shouldOpenInNewTab: true),
+
+                    Tables\Actions\Action::make('downloadPdf')
+                        ->label('PDF Original SpotVision')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->color('gray')
+                        ->action(function (Screening $record) {
+                            $fullPath = SpotVisionImporter::resolvePath($record->original_pdf_path);
+                            if (file_exists($fullPath)) {
+                                return response()->download($fullPath, $record->original_filename);
+                            }
+                            Notification::make()
+                                ->title('Archivo no encontrado')
+                                ->danger()
+                                ->send();
+                        }),
+                ])
+                ->label('Reportes & Graduación')
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->color('primary'),
 
                 Tables\Actions\EditAction::make(),
             ])

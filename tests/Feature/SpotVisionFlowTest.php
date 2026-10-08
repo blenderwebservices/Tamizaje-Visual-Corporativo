@@ -199,4 +199,31 @@ class SpotVisionFlowTest extends TestCase
         $this->assertEquals('sent', $screening->fresh()->whatsapp_status);
         $this->assertNotNull($screening->fresh()->whatsapp_sent_at);
     }
+
+    public function test_graduation_report_renders_and_contains_clinical_data(): void
+    {
+        $screening = Screening::first();
+        $screening->update([
+            'od_dnp_mm' => 31.5,
+            'os_dnp_mm' => 32.0,
+            'od_add' => 1.75,
+            'os_add' => 1.75,
+            'optometrist_name' => 'Opt. Francisco R.',
+            'optometrist_notes' => 'Paciente requiere bifocal con tratamiento antirreflejante.',
+        ]);
+
+        $response = $this->get('/graduacion/' . $screening->uuid);
+        $response->assertStatus(200);
+        $response->assertSee('PRESCRIPCIÓN ÓPTICA');
+        $response->assertSee('31.5 mm');
+        $response->assertSee('+1.75');
+        $response->assertSee('Opt. Francisco R.');
+
+        // Verificar mensaje de WhatsApp
+        $waMsg = $screening->generateGraduationWhatsAppMessage();
+        $this->assertStringContainsString('REPORTE OFICIAL DE GRADUACIÓN VISUAL', $waMsg);
+        $this->assertStringContainsString('31.5 mm', $waMsg);
+        $this->assertStringContainsString('+1.75', $waMsg);
+        $this->assertStringContainsString('/graduacion/' . $screening->uuid, $waMsg);
+    }
 }
