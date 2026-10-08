@@ -14,6 +14,7 @@ class SpotVisionAiExtractor
     public function extractFromImage(string $imageFullPath): ?array
     {
         if (!file_exists($imageFullPath)) {
+            Log::warning("SpotVisionAiExtractor: Image file not found at {$imageFullPath}");
             return null;
         }
 
@@ -28,6 +29,8 @@ class SpotVisionAiExtractor
             } catch (Exception $e) {
                 Log::warning('Gemini Vision extraction failed: ' . $e->getMessage());
             }
+        } else {
+            Log::info('SpotVisionAiExtractor: No GEMINI_API_KEY found in configuration.');
         }
 
         // 2. Probar OpenAI API si está configurada
@@ -98,7 +101,8 @@ PROMPT;
     protected function callGeminiVision(string $imagePath, string $apiKey): ?array
     {
         $imageData = base64_encode(file_get_contents($imagePath));
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}";
+        $model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
@@ -126,8 +130,12 @@ PROMPT;
             $json = $response->json();
             $rawText = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
             if ($rawText) {
+                Log::info("Gemini Vision ({$model}) extraction successful for image: " . basename($imagePath));
                 return json_decode($rawText, true);
             }
+            Log::warning("Gemini Vision ({$model}) returned 200 OK but text content was empty.");
+        } else {
+            Log::warning("Gemini Vision ({$model}) HTTP error {$response->status()}: " . $response->body());
         }
 
         return null;
