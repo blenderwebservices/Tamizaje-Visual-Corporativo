@@ -270,10 +270,52 @@ class ScreeningResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\Action::make('sendWhatsApp')
-                    ->label('Enviar WhatsApp')
-                    ->icon('heroicon-o-chat-bubble-left-right')
+                Tables\Actions\Action::make('sendViaCloudApi')
+                    ->label('WhatsApp Enjoy Vision (API)')
+                    ->icon('heroicon-o-paper-airplane')
                     ->color('success')
+                    ->visible(fn (Screening $record) => ! empty($record->client?->phone))
+                    ->requiresConfirmation(fn () => ! \App\Services\WhatsAppCloudApiService::isConfigured())
+                    ->modalHeading('WhatsApp Cloud API Oficial')
+                    ->modalDescription(function () {
+                        if (! \App\Services\WhatsAppCloudApiService::isConfigured()) {
+                            return 'La API oficial de Enjoy Vision no está configurada aún en .env (requiere WHATSAPP_PHONE_ID y WHATSAPP_ACCESS_TOKEN). Puedes usar el botón de "WhatsApp Web (Operador)" para enviar manualmente mientras tanto.';
+                        }
+                        return '¿Deseas enviar el reporte oficial de tamizaje automáticamente desde el número corporativo de Enjoy Vision?';
+                    })
+                    ->modalSubmitActionLabel(fn () => \App\Services\WhatsAppCloudApiService::isConfigured() ? 'Confirmar Envío API' : 'Entendido')
+                    ->action(function (Screening $record) {
+                        if (! \App\Services\WhatsAppCloudApiService::isConfigured()) {
+                            Notification::make()
+                                ->title('API no configurada')
+                                ->body('Configura WHATSAPP_PHONE_ID y WHATSAPP_ACCESS_TOKEN en tu archivo .env. Mientras tanto, usa la opción "WhatsApp Web (Operador)".')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        $service = app(\App\Services\WhatsAppCloudApiService::class);
+                        $result = $service->sendScreeningReport($record);
+
+                        if ($result['success']) {
+                            Notification::make()
+                                ->title('Enviado desde Enjoy Vision')
+                                ->body($result['message'])
+                                ->success()
+                                ->send();
+                        } else {
+                            Notification::make()
+                                ->title('Error al enviar por API')
+                                ->body($result['message'])
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+
+                Tables\Actions\Action::make('sendWhatsApp')
+                    ->label('WhatsApp Web (Operador)')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->color('gray')
                     ->url(fn (Screening $record) => $record->whatsapp_url, shouldOpenInNewTab: true)
                     ->visible(fn (Screening $record) => ! empty($record->client?->phone))
                     ->action(function (Screening $record) {
@@ -283,7 +325,7 @@ class ScreeningResource extends Resource
                         ]);
                         Notification::make()
                             ->title('WhatsApp Registrado')
-                            ->body('Se actualizó el estado a Enviado.')
+                            ->body('Se abrió el enlace y se actualizó el estado a Enviado.')
                             ->success()
                             ->send();
                     }),

@@ -163,4 +163,40 @@ class SpotVisionFlowTest extends TestCase
         $this->assertStringStartsWith('MANUAL_', $manualScreening->barcode_code);
         $this->assertNotEmpty($manualScreening->whatsapp_message_body);
     }
+
+    public function test_whatsapp_cloud_api_service_detects_unconfigured_state(): void
+    {
+        config(['services.whatsapp.phone_id' => null, 'services.whatsapp.token' => null]);
+        $service = new \App\Services\WhatsAppCloudApiService();
+        $screening = Screening::first();
+
+        $result = $service->sendScreeningReport($screening);
+        $this->assertFalse($result['success']);
+    }
+
+    public function test_whatsapp_cloud_api_service_sends_report_successfully_when_mocked(): void
+    {
+        config([
+            'services.whatsapp.phone_id' => '10987654321',
+            'services.whatsapp.token' => 'EAAG_fake_token_test',
+            'services.whatsapp.api_version' => 'v21.0',
+        ]);
+
+        \Illuminate\Support\Facades\Http::fake([
+            'https://graph.facebook.com/v21.0/10987654321/messages' => \Illuminate\Support\Facades\Http::response([
+                'messaging_product' => 'whatsapp',
+                'contacts' => [['input' => '528114567890', 'wa_id' => '528114567890']],
+                'messages' => [['id' => 'wamid.HBgTEST123456']],
+            ], 200),
+        ]);
+
+        $service = new \App\Services\WhatsAppCloudApiService();
+        $screening = Screening::first();
+
+        $result = $service->sendScreeningReport($screening);
+        $this->assertTrue($result['success']);
+        $this->assertEquals('wamid.HBgTEST123456', $result['wamid']);
+        $this->assertEquals('sent', $screening->fresh()->whatsapp_status);
+        $this->assertNotNull($screening->fresh()->whatsapp_sent_at);
+    }
 }

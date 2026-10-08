@@ -42,6 +42,36 @@
             </div>
         </div>
 
+        <!-- Banner de Canal de Salida (Enjoy Vision API vs Operador) -->
+        <div class="p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 {{ $data['isApiConfigured'] ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800' : 'bg-slate-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700' }}">
+            <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg {{ $data['isApiConfigured'] ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300' }}">
+                    <x-heroicon-m-signal class="w-5 h-5" />
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">Canal Corporativo: WhatsApp Cloud API (Enjoy Vision)</span>
+                        @if($data['isApiConfigured'])
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">
+                                Conectado
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+                                Pendiente de Credenciales (.env)
+                            </span>
+                        @endif
+                    </div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        @if($data['isApiConfigured'])
+                            Los envíos saldrán de manera desatendida desde el número oficial de Enjoy Vision.
+                        @else
+                            Modo activo: <strong>WhatsApp Web (Operador)</strong> habilitado para envíos manuales. Configura <code class="font-mono text-xs">WHATSAPP_PHONE_ID</code> y <code class="font-mono text-xs">WHATSAPP_ACCESS_TOKEN</code> para envíos corporativos en 1 clic.
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- Barra de Filtros y Búsqueda -->
         <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
             <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -132,22 +162,36 @@
                         <!-- Botones de Acción Rápida -->
                         <div class="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center gap-2">
                             @if(!empty($item->client?->phone))
+                                <!-- Opción 1: WhatsApp Oficial Enjoy Vision (API) -->
+                                <button
+                                    type="button"
+                                    wire:click="sendViaCloudApi({{ $item->id }})"
+                                    wire:loading.attr="disabled"
+                                    class="inline-flex items-center justify-center gap-2 px-3.5 py-2 {{ $data['isApiConfigured'] ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-700' }} font-semibold text-xs rounded-lg transition shadow-sm"
+                                    title="{{ $data['isApiConfigured'] ? 'Envío automático por detrás desde Enjoy Vision' : 'Configurar API en .env para envío automático' }}"
+                                >
+                                    <x-heroicon-o-paper-airplane class="w-4 h-4" />
+                                    <span>Enviar con Enjoy Vision (API)</span>
+                                </button>
+
+                                <!-- Opción 2: WhatsApp Web del Operador (Manual) -->
                                 <a
                                     href="{{ $item->whatsapp_url }}"
                                     target="_blank"
                                     wire:click="markAsSent({{ $item->id }})"
-                                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg transition shadow-sm"
+                                    class="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-xs rounded-lg transition border border-gray-200 dark:border-gray-700"
+                                    title="Abre el chat en WhatsApp Web de la cuenta activa en este navegador"
                                 >
-                                    <x-heroicon-o-chat-bubble-left-right class="w-5 h-5" />
-                                    Enviar vía WhatsApp
+                                    <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
+                                    <span>WhatsApp Web (Operador)</span>
                                 </a>
                             @else
-                                <button disabled class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed">
+                                <button disabled class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 text-xs font-medium rounded-lg cursor-not-allowed">
                                     Sin teléfono registrado
                                 </button>
                             @endif
 
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 w-full">
                                 <a
                                     href="{{ $item->public_report_url }}"
                                     target="_blank"

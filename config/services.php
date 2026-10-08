@@ -45,5 +45,13 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
 
+    'whatsapp' => [
+        'phone_id' => env('WHATSAPP_PHONE_ID'),
+        'token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
+        'template_name' => env('WHATSAPP_TEMPLATE_NAME', 'reporte_tamizaje_visual'),
+    ],
+
 ];
 

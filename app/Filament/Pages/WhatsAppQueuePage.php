@@ -25,6 +25,40 @@ class WhatsAppQueuePage extends Page
     public ?int $filterCompany = null;
     public ?string $search = '';
 
+    public function sendViaCloudApi(int $id): void
+    {
+        $screening = Screening::find($id);
+        if (! $screening) {
+            return;
+        }
+
+        if (! \App\Services\WhatsAppCloudApiService::isConfigured()) {
+            Notification::make()
+                ->title('API Oficial de Enjoy Vision no configurada')
+                ->body('Debes agregar WHATSAPP_PHONE_ID y WHATSAPP_ACCESS_TOKEN en tu archivo .env. Puedes usar el botón "WhatsApp Web (Operador)" mientras tanto.')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $service = app(\App\Services\WhatsAppCloudApiService::class);
+        $result = $service->sendScreeningReport($screening);
+
+        if ($result['success']) {
+            Notification::make()
+                ->title('Enviado desde Enjoy Vision')
+                ->body($result['message'])
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Error de envío API')
+                ->body($result['message'])
+                ->danger()
+                ->send();
+        }
+    }
+
     public function markAsSent(int $id): void
     {
         $screening = Screening::find($id);
@@ -113,6 +147,7 @@ class WhatsAppQueuePage extends Page
             'pendingCount' => $pendingCount,
             'sentCount' => $sentCount,
             'companies' => $companies,
+            'isApiConfigured' => \App\Services\WhatsAppCloudApiService::isConfigured(),
         ];
     }
 }
