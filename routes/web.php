@@ -18,3 +18,7 @@ Route::get('/registro/pase/{uuid}', [PublicScreeningController::class, 'showRegi
 // Fase 3: Reporte Digital del Paciente y Descarga Segura de PDF
 Route::get('/reporte/{uuid}', [PublicScreeningController::class, 'showDigitalReport'])->name('report.show');
 Route::get('/reporte/{uuid}/pdf', [PublicScreeningController::class, 'downloadPdf'])->name('report.download');
+
+// Reporte 2: Prescripción Óptica y Graduación Oficial (Enjoy Vision)
+Route::get('/graduacion/{uuid}', [PublicScreeningController::class, 'showGraduationReport'])->name('graduation.show');
+

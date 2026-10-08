@@ -117,6 +117,22 @@ class PublicScreeningController extends Controller
     }
 
     /**
+     * Reporte Clínico 2: Prescripción Óptica y Graduación Oficial del Optometrista
+     */
+    public function showGraduationReport(string $uuid)
+    {
+        $screening = Screening::with(['client', 'company'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+
+        return view('public.graduation-report', [
+            'screening' => $screening,
+            'client' => $screening->client,
+            'company' => $screening->company,
+        ]);
+    }
+
+    /**
      * Descarga segura del archivo PDF original emitido por el SpotVision
      */
     public function downloadPdf(string $uuid)

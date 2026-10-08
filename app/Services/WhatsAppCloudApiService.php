@@ -201,6 +201,100 @@ class WhatsAppCloudApiService
     }
 
     /**
+     * Envía el reporte oficial de Graduación / Receta Óptica desde Enjoy Vision
+     */
+    public function sendGraduationReport(Screening $screening): array
+    {
+        if (!self::isConfigured()) {
+            return [
+                'success' => false,
+                'message' => 'WhatsApp Cloud API no está configurada aún en .env.',
+            ];
+        }
+
+        $phone = $screening->client?->phone;
+        if (empty($phone)) {
+            return [
+                'success' => false,
+                'message' => 'El paciente no tiene un número telefónico registrado.',
+            ];
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', Client::sanitizePhone($phone) ?: $phone);
+        if (empty($cleanPhone) || strlen($cleanPhone) < 10) {
+            return [
+                'success' => false,
+                'message' => "El número telefónico '{$phone}' no tiene formato internacional válido.",
+            ];
+        }
+
+        $phoneId = self::getPhoneId();
+        $token = self::getToken();
+        $version = self::getApiVersion();
+        $messageText = $screening->generateGraduationWhatsAppMessage();
+
+        $url = "https://graph.facebook.com/{$version}/{$phoneId}/messages";
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'recipient_type' => 'individual',
+            'to' => $cleanPhone,
+            'type' => 'text',
+            'text' => [
+                'preview_url' => true,
+                'body' => $messageText,
+            ],
+        ];
+
+        try {
+            Log::info("WhatsAppCloudApi: Enviando graduación #{$screening->id} a {$cleanPhone} desde PhoneID {$phoneId}");
+
+            $response = Http::withToken($token)
+                ->timeout(15)
+                ->post($url, $payload);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $wamid = $data['messages'][0]['id'] ?? 'N/A';
+
+                $screening->update([
+                    'graduation_sent_at' => now(),
+                ]);
+
+                Log::info("WhatsAppCloudApi: Graduación #{$screening->id} enviada exitosamente. WAMID: {$wamid}");
+
+                return [
+                    'success' => true,
+                    'message' => "Reporte de graduación enviado exitosamente desde Enjoy Vision (ID: {$wamid}).",
+                    'wamid' => $wamid,
+                ];
+            }
+
+            $errorData = $response->json()['error'] ?? [];
+            $errorMsg = $errorData['message'] ?? $response->body();
+            $errorCode = $errorData['code'] ?? $response->status();
+
+            Log::error("WhatsAppCloudApi graduación error {$errorCode}: {$errorMsg}", [
+                'screening_id' => $screening->id,
+                'phone' => $cleanPhone,
+                'response' => $response->json(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => "Meta API Error ({$errorCode}): {$errorMsg}",
+            ];
+        } catch (Throwable $e) {
+            Log::error("WhatsAppCloudApi Exception: " . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Error de conexión con WhatsApp Cloud API: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Respaldo para leer directamente de .env cuando la caché de configuración en producción está congelada
      */
     protected static function readEnvDirect(string $key): ?string
