@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Client;
-use App\Models\Company;
 use App\Models\RetargetingLog;
 use App\Models\Screening;
 use Carbon\Carbon;
@@ -34,17 +33,17 @@ class SpotVisionImporter
             return Storage::disk('local')->path($path);
         }
 
-        $privatePath = storage_path('app/private/' . ltrim($path, '/'));
+        $privatePath = storage_path('app/private/'.ltrim($path, '/'));
         if (file_exists($privatePath)) {
             return $privatePath;
         }
 
-        $appPath = storage_path('app/' . ltrim($path, '/'));
+        $appPath = storage_path('app/'.ltrim($path, '/'));
         if (file_exists($appPath)) {
             return $appPath;
         }
 
-        $publicPath = storage_path('app/public/' . ltrim($path, '/'));
+        $publicPath = storage_path('app/public/'.ltrim($path, '/'));
         if (file_exists($publicPath)) {
             return $publicPath;
         }
@@ -69,48 +68,48 @@ class SpotVisionImporter
             $mime = $fileSource->getMimeType();
 
             if ($fileSize > $maxSizeBytes) {
-                throw new Exception("El archivo supera el tamaño máximo permitido de 15 MB.");
+                throw new Exception('El archivo supera el tamaño máximo permitido de 15 MB.');
             }
 
-            if (!in_array(strtolower($fileSource->getClientOriginalExtension()), ['pdf']) ||
-                !str_contains(strtolower($mime), 'pdf')) {
-                throw new Exception("El archivo debe ser un documento PDF válido.");
+            if (! in_array(strtolower($fileSource->getClientOriginalExtension()), ['pdf']) ||
+                ! str_contains(strtolower($mime), 'pdf')) {
+                throw new Exception('El archivo debe ser un documento PDF válido.');
             }
 
             $storageDir = storage_path('app/spotvision_pdfs');
-            if (!file_exists($storageDir)) {
+            if (! file_exists($storageDir)) {
                 mkdir($storageDir, 0755, true);
             }
 
-            $storedFilename = 'spotvision_' . Str::uuid() . '.pdf';
+            $storedFilename = 'spotvision_'.Str::uuid().'.pdf';
             $fileSource->move($storageDir, $storedFilename);
-            $localPdfPath = $storageDir . '/' . $storedFilename;
+            $localPdfPath = $storageDir.'/'.$storedFilename;
         } else {
             $localPdfPath = self::resolvePath($fileSource);
-            if (!file_exists($localPdfPath)) {
+            if (! file_exists($localPdfPath)) {
                 throw new Exception("El archivo no existe en la ruta especificada: {$localPdfPath}");
             }
 
             $fileSize = filesize($localPdfPath);
             if ($fileSize > $maxSizeBytes) {
-                throw new Exception("El archivo supera el límite de seguridad de 15 MB.");
+                throw new Exception('El archivo supera el límite de seguridad de 15 MB.');
             }
 
             $originalFilename = $passedOriginalFilename ?: basename($localPdfPath);
 
             // Almacenar copia de seguridad en carpeta de la app
             $storageDir = storage_path('app/spotvision_pdfs');
-            if (!file_exists($storageDir)) {
+            if (! file_exists($storageDir)) {
                 mkdir($storageDir, 0755, true);
             }
-            $storedFilename = 'spotvision_' . Str::uuid() . '.pdf';
-            copy($localPdfPath, $storageDir . '/' . $storedFilename);
-            $localPdfPath = $storageDir . '/' . $storedFilename;
+            $storedFilename = 'spotvision_'.Str::uuid().'.pdf';
+            copy($localPdfPath, $storageDir.'/'.$storedFilename);
+            $localPdfPath = $storageDir.'/'.$storedFilename;
         }
 
         // 1. Extraer imagen embebida del reporte (Haru PDF)
         $previewImagePath = $this->pdfExtractor->extractImageFromPdf($localPdfPath);
-        $previewFullPath = $previewImagePath ? storage_path('app/public/' . $previewImagePath) : null;
+        $previewFullPath = $previewImagePath ? storage_path('app/public/'.$previewImagePath) : null;
 
         // 2. Extracción Híbrida: Probar IA primero
         $extractedData = null;
@@ -118,7 +117,7 @@ class SpotVisionImporter
 
         if ($previewFullPath && file_exists($previewFullPath)) {
             $aiData = $this->aiExtractor->extractFromImage($previewFullPath);
-            if (!empty($aiData) && is_array($aiData)) {
+            if (! empty($aiData) && is_array($aiData)) {
                 $extractedData = $aiData;
                 $extractionMethod = 'ai_vision';
             }
@@ -131,7 +130,7 @@ class SpotVisionImporter
         }
 
         // Sobrescribir nombre si se pasó manualmente
-        if (!empty($manualClientName)) {
+        if (! empty($manualClientName)) {
             $extractedData['full_name'] = $manualClientName;
         }
 
@@ -147,11 +146,11 @@ class SpotVisionImporter
         // Buscar si ya existe por ID de sujeto o nombre + fecha/edad
         $client = Client::findMatch($fullName, $subjectCode, $birthDate, $age);
 
-        if (!$client) {
+        if (! $client) {
             // Crear nuevo cliente
             $first = $extractedData['first_name'] ?? null;
             $last = $extractedData['last_name'] ?? null;
-            if (empty($first) && !empty($fullName)) {
+            if (empty($first) && ! empty($fullName)) {
                 $parts = explode(' ', $fullName, 2);
                 $first = $parts[0];
                 $last = $parts[1] ?? '';
@@ -162,7 +161,7 @@ class SpotVisionImporter
                 'subject_code' => $subjectCode,
                 'first_name' => $first,
                 'last_name' => $last,
-                'full_name' => $fullName ?: 'Paciente ' . ($subjectCode ?: Str::random(5)),
+                'full_name' => $fullName ?: 'Paciente '.($subjectCode ?: Str::random(5)),
                 'gender' => $extractedData['gender'] ?? null,
                 'birth_date' => $birthDate ? Carbon::parse($birthDate)->toDateString() : null,
                 'age' => $age,
@@ -175,22 +174,22 @@ class SpotVisionImporter
         } else {
             // Actualizar campos faltantes del cliente si no los tenía
             $updates = [];
-            if (empty($client->subject_code) && !empty($subjectCode)) {
+            if (empty($client->subject_code) && ! empty($subjectCode)) {
                 $updates['subject_code'] = $subjectCode;
             }
-            if (empty($client->birth_date) && !empty($birthDate)) {
+            if (empty($client->birth_date) && ! empty($birthDate)) {
                 $updates['birth_date'] = Carbon::parse($birthDate)->toDateString();
             }
-            if (empty($client->company_id) && !empty($companyId)) {
+            if (empty($client->company_id) && ! empty($companyId)) {
                 $updates['company_id'] = $companyId;
             }
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $client->update($updates);
             }
         }
 
         // 6. Registrar el Tamizaje (Screening)
-        $examDate = !empty($extractedData['exam_date'])
+        $examDate = ! empty($extractedData['exam_date'])
             ? Carbon::parse($extractedData['exam_date'])
             : now();
 
@@ -200,13 +199,13 @@ class SpotVisionImporter
             'subject_code' => $subjectCode,
             'barcode_code' => $extractedData['barcode_code'] ?? null,
             'exam_date' => $examDate,
-            'original_pdf_path' => 'spotvision_pdfs/' . basename($localPdfPath),
+            'original_pdf_path' => 'spotvision_pdfs/'.basename($localPdfPath),
             'original_filename' => $originalFilename,
             'preview_image_path' => $previewImagePath,
             'device_serial' => $extractedData['device_serial'] ?? null,
             'screening_status' => $clinicalResult['screening_status'],
             'status_label' => $extractedData['status_label'] ?? ($clinicalResult['screening_status'] === 'pass' ? 'Todas las mediciones en rangos normales' : 'Selección finalizada'),
-            'wears_glasses' => (bool)($extractedData['wears_glasses'] ?? false),
+            'wears_glasses' => (bool) ($extractedData['wears_glasses'] ?? false),
             'interpupillary_distance_mm' => $extractedData['interpupillary_distance_mm'] ?? null,
             'cylinder_mode' => $extractedData['cylinder_mode'] ?? '-CIL',
             'od_sphere_se' => $extractedData['od']['sphere_se'] ?? null,
@@ -252,14 +251,15 @@ class SpotVisionImporter
         $ocr = $previewFullPath ? $this->pdfExtractor->extractOcrData($previewFullPath) : [];
 
         $subjectCode = $ocr['subject_code'] ?? $meta['subject_code'] ?? 'ENG7';
-        $fullName = $ocr['full_name'] ?? $meta['client_name'] ?? 'Colaborador ' . $subjectCode;
+        $fullName = $ocr['full_name'] ?? $meta['client_name'] ?? 'Colaborador '.$subjectCode;
         $birthDate = $ocr['birth_date'] ?? '1992-05-05';
 
         $age = null;
-        if (!empty($birthDate)) {
+        if (! empty($birthDate)) {
             try {
                 $age = Carbon::parse($birthDate)->age;
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
 
         $data = [
@@ -304,7 +304,7 @@ class SpotVisionImporter
     /**
      * Programa los 3 hitos de seguimiento del embudo (Día 3, Día 15 y Día 90)
      */
-    protected function scheduleRetargetingCampaigns(Client $client, Carbon $examDate): void
+    public function scheduleRetargetingCampaigns(Client $client, Carbon $examDate): void
     {
         $campaigns = [
             [
@@ -331,7 +331,7 @@ class SpotVisionImporter
                 ->where('stage', $camp['stage'])
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 RetargetingLog::create([
                     'client_id' => $client->id,
                     'stage' => $camp['stage'],
@@ -350,11 +350,11 @@ class SpotVisionImporter
      */
     public function importFromDirectory(string $directoryPath, ?int $companyId = null): array
     {
-        if (!is_dir($directoryPath)) {
+        if (! is_dir($directoryPath)) {
             throw new Exception("El directorio especificado no existe o no es accesible: {$directoryPath}");
         }
 
-        $files = glob($directoryPath . '/*.pdf') ?: [];
+        $files = glob($directoryPath.'/*.pdf') ?: [];
         $results = [
             'total' => count($files),
             'imported' => 0,

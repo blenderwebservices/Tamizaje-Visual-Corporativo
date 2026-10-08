@@ -4,13 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScreeningResource\Pages;
 use App\Models\Screening;
+use App\Services\SpotVisionImporter;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class ScreeningResource extends Resource
 {
@@ -40,23 +41,32 @@ class ScreeningResource extends Resource
                                     Forms\Components\Placeholder::make('preview_image')
                                         ->label('Comprobante Visual')
                                         ->content(function (?Screening $record) {
-                                            if (!$record || !$record->preview_image_path) {
+                                            if (! $record || ! $record->preview_image_path) {
                                                 return 'Sin imagen de previsualización disponible.';
                                             }
-                                            $url = asset('storage/' . $record->preview_image_path);
-                                            return new \Illuminate\Support\HtmlString(
-                                                '<div class="rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700 shadow-sm">' .
-                                                '<img src="' . e($url) . '" alt="Reporte SpotVision" class="w-full h-auto object-contain max-h-[600px]" />' .
+                                            $url = asset('storage/'.$record->preview_image_path);
+
+                                            return new HtmlString(
+                                                '<div class="rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700 shadow-sm">'.
+                                                '<img src="'.e($url).'" alt="Reporte SpotVision" class="w-full h-auto object-contain max-h-[600px]" />'.
                                                 '</div>'
                                             );
                                         }),
+                                    Forms\Components\FileUpload::make('preview_image_path')
+                                        ->label('Comprobante / Foto (Opcional)')
+                                        ->image()
+                                        ->disk('public')
+                                        ->directory('screenings_previews')
+                                        ->visible(fn (string $operation) => $operation === 'create'),
                                     Forms\Components\TextInput::make('barcode_code')
                                         ->label('Código de Barras / Trazabilidad')
+                                        ->placeholder('Generado automáticamente')
                                         ->disabled(),
                                     Forms\Components\TextInput::make('extraction_method')
                                         ->label('Método de Extracción')
-                                        ->badge()
-                                        ->disabled(),
+                                        ->default('manual')
+                                        ->disabled()
+                                        ->dehydrated(),
                                 ]),
                         ])->columnSpan(1),
 
@@ -86,6 +96,7 @@ class ScreeningResource extends Resource
                                             'refer' => '⚠️ REMITIR (Requiere Valoración Optométrica)',
                                             'incomplete' => '❌ Incompleto',
                                         ])
+                                        ->default('refer')
                                         ->required(),
                                     Forms\Components\TextInput::make('status_label')
                                         ->label('Etiqueta del Dispositivo')
@@ -185,7 +196,7 @@ class ScreeningResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
-                    ->description(fn (Screening $record) => $record->client?->phone ? "📱 " . $record->client->phone : "Sin teléfono"),
+                    ->description(fn (Screening $record) => $record->client?->phone ? '📱 '.$record->client->phone : 'Sin teléfono'),
                 Tables\Columns\TextColumn::make('exam_date')
                     ->label('Fecha Examen')
                     ->dateTime('d/m/Y H:i')
@@ -210,6 +221,7 @@ class ScreeningResource extends Resource
                         $se = $record->od_sphere_se !== null ? number_format($record->od_sphere_se, 2) : '-';
                         $dc = $record->od_cylinder_dc !== null ? number_format($record->od_cylinder_dc, 2) : '-';
                         $ax = $record->od_axis !== null ? " @{$record->od_axis}°" : '';
+
                         return "SE: {$se} | DC: {$dc}{$ax}";
                     }),
                 Tables\Columns\TextColumn::make('os_refraction')
@@ -218,6 +230,7 @@ class ScreeningResource extends Resource
                         $se = $record->os_sphere_se !== null ? number_format($record->os_sphere_se, 2) : '-';
                         $dc = $record->os_cylinder_dc !== null ? number_format($record->os_cylinder_dc, 2) : '-';
                         $ax = $record->os_axis !== null ? " @{$record->os_axis}°" : '';
+
                         return "SE: {$se} | DC: {$dc}{$ax}";
                     }),
                 Tables\Columns\TextColumn::make('findings')
@@ -262,7 +275,7 @@ class ScreeningResource extends Resource
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('success')
                     ->url(fn (Screening $record) => $record->whatsapp_url, shouldOpenInNewTab: true)
-                    ->visible(fn (Screening $record) => !empty($record->client?->phone))
+                    ->visible(fn (Screening $record) => ! empty($record->client?->phone))
                     ->action(function (Screening $record) {
                         $record->update([
                             'whatsapp_status' => 'sent',
@@ -286,7 +299,7 @@ class ScreeningResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
                     ->action(function (Screening $record) {
-                        $fullPath = \App\Services\SpotVisionImporter::resolvePath($record->original_pdf_path);
+                        $fullPath = SpotVisionImporter::resolvePath($record->original_pdf_path);
                         if (file_exists($fullPath)) {
                             return response()->download($fullPath, $record->original_filename);
                         }

@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\ScreeningResource\Pages\CreateScreening;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\Screening;
-use App\Services\SpotVisionImporter;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class SpotVisionFlowTest extends TestCase
@@ -94,7 +96,7 @@ class SpotVisionFlowTest extends TestCase
         $screening = Screening::first();
         $this->assertNotNull($screening);
 
-        $response = $this->get('/reporte/' . $screening->uuid);
+        $response = $this->get('/reporte/'.$screening->uuid);
         $response->assertStatus(200);
         $response->assertSee($screening->client->full_name);
         $response->assertSee('Ojo Derecho (OD)');
@@ -128,5 +130,37 @@ class SpotVisionFlowTest extends TestCase
         // Buscar al de 2001
         $found2 = Client::findMatch('Juan Perez Garcia', null, '2001-12-20', 24);
         $this->assertEquals($c2->id, $found2->id);
+    }
+
+    public function test_admin_create_screening_page_renders_successfully(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/admin/screenings/create');
+        $response->assertStatus(200);
+    }
+
+    public function test_can_create_manual_screening(): void
+    {
+        $user = User::factory()->create();
+        $client = Client::first();
+
+        Livewire::actingAs($user)
+            ->test(CreateScreening::class)
+            ->fillForm([
+                'client_id' => $client->id,
+                'screening_status' => 'refer',
+                'od_sphere_se' => -1.25,
+                'os_sphere_se' => -1.50,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $manualScreening = Screening::where('extraction_method', 'manual')->first();
+        $this->assertNotNull($manualScreening);
+        $this->assertEquals($client->id, $manualScreening->client_id);
+        $this->assertEquals('refer', $manualScreening->screening_status);
+        $this->assertStringStartsWith('MANUAL_', $manualScreening->barcode_code);
+        $this->assertNotEmpty($manualScreening->whatsapp_message_body);
     }
 }
