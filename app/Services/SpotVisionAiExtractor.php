@@ -11,6 +11,70 @@ class SpotVisionAiExtractor
     /**
      * Intenta extraer los datos del reporte usando Gemini o OpenAI Multimodal Vision
      */
+    /**
+     * Obtiene la clave de Gemini con tolerancia a fallos cuando la caché de configuración
+     * en producción está congelada o no se ejecutó config:clear tras editar .env en cPanel
+     */
+    public static function getGeminiKey(): ?string
+    {
+        $key = config('services.gemini.api_key') ?: env('GEMINI_API_KEY');
+        if (!empty($key)) {
+            return $key;
+        }
+
+        // Respaldo de lectura directa de .env en caso de que config:cache esté activo sin la clave
+        $envPath = base_path('.env');
+        if (file_exists($envPath)) {
+            $lines = @file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines) {
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (str_starts_with($line, '#')) continue;
+                    if (str_starts_with($line, 'GEMINI_API_KEY=')) {
+                        $val = trim(substr($line, strlen('GEMINI_API_KEY=')));
+                        $clean = trim($val, "\"'");
+                        if (!empty($clean)) {
+                            return $clean;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene el modelo de Gemini con tolerancia a fallos de caché de configuración
+     */
+    public static function getGeminiModel(): string
+    {
+        $model = config('services.gemini.model') ?: env('GEMINI_MODEL');
+        if (!empty($model)) {
+            return $model;
+        }
+
+        $envPath = base_path('.env');
+        if (file_exists($envPath)) {
+            $lines = @file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            if ($lines) {
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (str_starts_with($line, '#')) continue;
+                    if (str_starts_with($line, 'GEMINI_MODEL=')) {
+                        $val = trim(substr($line, strlen('GEMINI_MODEL=')));
+                        $clean = trim($val, "\"'");
+                        if (!empty($clean)) {
+                            return $clean;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 'gemini-1.5-flash';
+    }
+
     public function extractFromImage(string $imageFullPath): ?array
     {
         if (!file_exists($imageFullPath)) {
@@ -19,7 +83,7 @@ class SpotVisionAiExtractor
         }
 
         // 1. Probar Gemini API si está configurada
-        $geminiKey = config('services.gemini.api_key', env('GEMINI_API_KEY'));
+        $geminiKey = self::getGeminiKey();
         if (!empty($geminiKey)) {
             try {
                 $result = $this->callGeminiVision($imageFullPath, $geminiKey);
@@ -101,7 +165,7 @@ PROMPT;
     protected function callGeminiVision(string $imagePath, string $apiKey): ?array
     {
         $imageData = base64_encode(file_get_contents($imagePath));
-        $model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $model = self::getGeminiModel();
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $response = Http::withHeaders([

@@ -22,12 +22,12 @@ class AiStatusWidget extends Widget
     public function testConnection(): void
     {
         $this->isTesting = true;
-        $key = config('services.gemini.api_key', env('GEMINI_API_KEY'));
-        $model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $key = \App\Services\SpotVisionAiExtractor::getGeminiKey();
+        $model = \App\Services\SpotVisionAiExtractor::getGeminiModel();
 
         if (empty($key)) {
             $this->testStatus = 'danger';
-            $this->testMessage = 'Clave GEMINI_API_KEY no detectada en la configuración.';
+            $this->testMessage = 'Clave GEMINI_API_KEY no detectada en la configuración ni en .env.';
             $this->isTesting = false;
             return;
         }
@@ -67,8 +67,8 @@ class AiStatusWidget extends Widget
 
     public function getViewData(): array
     {
-        $key = config('services.gemini.api_key', env('GEMINI_API_KEY'));
-        $model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-1.5-flash'));
+        $key = \App\Services\SpotVisionAiExtractor::getGeminiKey();
+        $model = \App\Services\SpotVisionAiExtractor::getGeminiModel();
         $isConfigured = !empty($key);
 
         $totalScreenings = Screening::count();
