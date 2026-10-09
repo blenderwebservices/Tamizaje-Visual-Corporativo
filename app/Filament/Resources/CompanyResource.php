@@ -8,8 +8,9 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CompanyResource extends Resource
 {
@@ -123,6 +124,52 @@ class CompanyResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+        return $user && ($user->isAdmin() || $user->isEmpresarial());
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->isEmpresarial() && $user->company_id === $record->id;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (! $user || $user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isEmpresarial()) {
+            return $query->where('id', $user->company_id);
+        }
+
+        return $query->whereRaw('0 = 1');
     }
 
     public static function getPages(): array

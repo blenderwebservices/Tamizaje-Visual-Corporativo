@@ -16,6 +16,7 @@ class Client extends Model
     protected $fillable = [
         'uuid',
         'company_id',
+        'user_id',
         'client_code',
         'subject_code',
         'first_name',
@@ -51,7 +52,18 @@ class Client extends Model
             if (empty($client->full_name)) {
                 $client->full_name = trim(($client->first_name ?? '') . ' ' . ($client->last_name ?? ''));
             }
+            if (empty($client->user_id) && auth()->check()) {
+                $client->user_id = auth()->id();
+            }
+            if (empty($client->company_id) && auth()->check() && auth()->user()->company_id) {
+                $client->company_id = auth()->user()->company_id;
+            }
         });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function company(): BelongsTo

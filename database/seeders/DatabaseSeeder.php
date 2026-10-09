@@ -16,12 +16,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Usuario Administrador de Filament
-        User::firstOrCreate(
+        // 1. Usuario Administrador Global
+        $admin = User::updateOrCreate(
             ['email' => 'admin@visualcorporativo.com'],
             [
-                'name' => 'Optometrista Coordinador',
+                'name' => 'Optometrista Coordinador (Admin)',
                 'password' => Hash::make('admin123'),
+                'role' => User::ROLE_ADMIN,
+                'company_id' => null,
                 'email_verified_at' => now(),
             ]
         );
@@ -51,12 +53,49 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Cliente Registrado Previamente en Fase 1 (Simulación del Formulario de Registro con Teléfono)
+        // 3. Usuario Empresarial (Administrador del grupo Schneider Electric)
+        $empresaUser = User::updateOrCreate(
+            ['email' => 'empresa@schneider.com'],
+            [
+                'name' => 'Coordinador Schneider Electric (Empresarial)',
+                'password' => Hash::make('empresa123'),
+                'role' => User::ROLE_EMPRESARIAL,
+                'company_id' => $company1->id,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 4. Usuario Operador asignado a Schneider Electric
+        $operadorSchneider = User::updateOrCreate(
+            ['email' => 'operador@schneider.com'],
+            [
+                'name' => 'Operador Schneider (Usuario)',
+                'password' => Hash::make('operador123'),
+                'role' => User::ROLE_USER,
+                'company_id' => $company1->id,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 5. Usuario Estándar Independiente
+        $independentUser = User::updateOrCreate(
+            ['email' => 'user@visualcorporativo.com'],
+            [
+                'name' => 'Optometrista Independiente (Usuario)',
+                'password' => Hash::make('user123'),
+                'role' => User::ROLE_USER,
+                'company_id' => null,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 6. Cliente Registrado Previamente en Fase 1
         Client::firstOrCreate(
             ['full_name' => 'Izamar Rodriguez Cabello'],
             [
                 'uuid' => (string) Str::uuid(),
                 'company_id' => $company1->id,
+                'user_id' => $operadorSchneider->id,
                 'client_code' => 'CLI-SCH007',
                 'subject_code' => 'ENG7',
                 'first_name' => 'Izamar',

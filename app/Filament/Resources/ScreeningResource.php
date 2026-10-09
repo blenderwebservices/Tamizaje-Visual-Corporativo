@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
 class ScreeningResource extends Resource
@@ -76,13 +77,34 @@ class ScreeningResource extends Resource
                                 ->schema([
                                     Forms\Components\Select::make('client_id')
                                         ->label('Colaborador / Paciente')
-                                        ->relationship('client', 'full_name')
+                                        ->relationship('client', 'full_name', modifyQueryUsing: function (Builder $query) {
+                                            $user = auth()->user();
+                                            if (! $user || $user->isAdmin()) {
+                                                return $query;
+                                            }
+                                            if ($user->isEmpresarial()) {
+                                                return $query->where('company_id', $user->company_id);
+                                            }
+                                            return $query->where('user_id', $user->id);
+                                        })
                                         ->searchable()
                                         ->required(),
                                     Forms\Components\Select::make('company_id')
                                         ->label('Empresa / Jornada')
-                                        ->relationship('company', 'name')
-                                        ->searchable(),
+                                        ->relationship('company', 'name', modifyQueryUsing: function (Builder $query) {
+                                            $user = auth()->user();
+                                            if (! $user || $user->isAdmin()) {
+                                                return $query;
+                                            }
+                                            if ($user->isEmpresarial()) {
+                                                return $query->where('id', $user->company_id);
+                                            }
+                                            return $query->whereRaw('0 = 1');
+                                        })
+                                        ->searchable()
+                                        ->default(fn () => auth()->user()?->company_id)
+                                        ->disabled(fn () => ! auth()->user()?->isAdmin())
+                                        ->dehydrated(),
                                     Forms\Components\TextInput::make('subject_code')
                                         ->label('ID Sujeto (SpotVision)')
                                         ->maxLength(50),
@@ -505,6 +527,22 @@ class ScreeningResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (! $user || $user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isEmpresarial()) {
+            return $query->where('company_id', $user->company_id);
+        }
+
+        return $query->where('user_id', $user->id);
     }
 
     public static function getPages(): array

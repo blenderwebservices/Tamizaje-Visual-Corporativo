@@ -42,19 +42,41 @@ class RetargetingCampaignsPage extends Page
 
     public function getCampaignData(): array
     {
-        $logs = RetargetingLog::with(['client.latestScreening', 'client.company'])
+        $user = auth()->user();
+        $scopeUser = function ($q) use ($user) {
+            if (! $user || $user->isAdmin()) {
+                return;
+            }
+            if ($user->isEmpresarial()) {
+                $q->where('company_id', $user->company_id);
+            } else {
+                $q->where('user_id', $user->id);
+            }
+        };
+
+        $logsQuery = RetargetingLog::with(['client.latestScreening', 'client.company'])
             ->where('stage', $this->activeTab)
-            ->whereHas('client', function ($q) {
-                // Excluir a quienes ya compraron en sitio
+            ->whereHas('client', function ($q) use ($scopeUser) {
                 $q->where('crm_stage', '!=', 'purchased_onsite');
+                $scopeUser($q);
             })
-            ->latest('scheduled_for')
-            ->paginate(15);
+            ->latest('scheduled_for');
+
+        $logs = $logsQuery->paginate(15);
 
         $counts = [
-            'day_3' => RetargetingLog::where('stage', 'day_3')->where('status', 'pending')->count(),
-            'day_15' => RetargetingLog::where('stage', 'day_15')->where('status', 'pending')->count(),
-            'day_90' => RetargetingLog::where('stage', 'day_90')->where('status', 'pending')->count(),
+            'day_3' => RetargetingLog::where('stage', 'day_3')
+                ->where('status', 'pending')
+                ->whereHas('client', fn ($q) => $scopeUser($q))
+                ->count(),
+            'day_15' => RetargetingLog::where('stage', 'day_15')
+                ->where('status', 'pending')
+                ->whereHas('client', fn ($q) => $scopeUser($q))
+                ->count(),
+            'day_90' => RetargetingLog::where('stage', 'day_90')
+                ->where('status', 'pending')
+                ->whereHas('client', fn ($q) => $scopeUser($q))
+                ->count(),
         ];
 
         return [

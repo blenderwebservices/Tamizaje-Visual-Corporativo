@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class OrderResource extends Resource
 {
@@ -33,12 +34,30 @@ class OrderResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('client_id')
                             ->label('Colaborador / Paciente')
-                            ->relationship('client', 'full_name')
+                            ->relationship('client', 'full_name', modifyQueryUsing: function (Builder $query) {
+                                $user = auth()->user();
+                                if (! $user || $user->isAdmin()) {
+                                    return $query;
+                                }
+                                if ($user->isEmpresarial()) {
+                                    return $query->where('company_id', $user->company_id);
+                                }
+                                return $query->where('user_id', $user->id);
+                            })
                             ->searchable()
                             ->required(),
                         Forms\Components\Select::make('screening_id')
                             ->label('Tamizaje SpotVision Asociado')
-                            ->relationship('screening', 'barcode_code')
+                            ->relationship('screening', 'barcode_code', modifyQueryUsing: function (Builder $query) {
+                                $user = auth()->user();
+                                if (! $user || $user->isAdmin()) {
+                                    return $query;
+                                }
+                                if ($user->isEmpresarial()) {
+                                    return $query->where('company_id', $user->company_id);
+                                }
+                                return $query->where('user_id', $user->id);
+                            })
                             ->searchable(),
                         Forms\Components\TextInput::make('order_number')
                             ->label('Folio de Venta')
@@ -163,6 +182,22 @@ class OrderResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (! $user || $user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isEmpresarial()) {
+            return $query->whereHas('client', fn (Builder $q) => $q->where('company_id', $user->company_id));
+        }
+
+        return $query->whereHas('client', fn (Builder $q) => $q->where('user_id', $user->id));
     }
 
     public static function getPages(): array

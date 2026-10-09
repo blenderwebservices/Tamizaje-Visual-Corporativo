@@ -33,4 +33,9 @@ class Company extends Model
     {
         return $this->hasMany(Screening::class);
     }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }

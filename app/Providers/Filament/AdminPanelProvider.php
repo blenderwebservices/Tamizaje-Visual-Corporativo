@@ -43,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
                 'Fase 3: Envíos WhatsApp y Reportes',
                 'Fase 4: Cierre y CRM en Sitio',
                 'Fase 5: Retargeting y Automatización',
+                'Administración y Usuarios',
             ])
             ->navigationItems([
                 \Filament\Navigation\NavigationItem::make('Ver Frontend (Web)')

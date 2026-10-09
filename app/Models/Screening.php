@@ -16,6 +16,7 @@ class Screening extends Model
         'uuid',
         'client_id',
         'company_id',
+        'user_id',
         'subject_code',
         'barcode_code',
         'exam_date',
@@ -92,7 +93,26 @@ class Screening extends Model
             if (empty($screening->uuid)) {
                 $screening->uuid = (string) Str::uuid();
             }
+            if (empty($screening->user_id)) {
+                if (auth()->check()) {
+                    $screening->user_id = auth()->id();
+                } elseif ($screening->client_id) {
+                    $screening->user_id = Client::where('id', $screening->client_id)->value('user_id');
+                }
+            }
+            if (empty($screening->company_id)) {
+                if (auth()->check() && auth()->user()->company_id) {
+                    $screening->company_id = auth()->user()->company_id;
+                } elseif ($screening->client_id) {
+                    $screening->company_id = Client::where('id', $screening->client_id)->value('company_id');
+                }
+            }
         });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function client(): BelongsTo

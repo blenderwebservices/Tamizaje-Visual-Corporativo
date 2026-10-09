@@ -94,7 +94,17 @@ class WhatsAppQueuePage extends Page
 
     public function markAllVisibleAsSent(): void
     {
+        $user = auth()->user();
         $query = Screening::query();
+
+        if ($user && ! $user->isAdmin()) {
+            if ($user->isEmpresarial()) {
+                $query->where('company_id', $user->company_id);
+            } else {
+                $query->where('user_id', $user->id);
+            }
+        }
+
         if ($this->filterStatus) {
             $query->where('whatsapp_status', $this->filterStatus);
         }
@@ -115,7 +125,20 @@ class WhatsAppQueuePage extends Page
 
     public function getViewData(): array
     {
+        $user = auth()->user();
+        $scopeUser = function ($q) use ($user) {
+            if (! $user || $user->isAdmin()) {
+                return;
+            }
+            if ($user->isEmpresarial()) {
+                $q->where('company_id', $user->company_id);
+            } else {
+                $q->where('user_id', $user->id);
+            }
+        };
+
         $query = Screening::with(['client', 'company'])->latest('exam_date');
+        $scopeUser($query);
 
         if ($this->filterStatus) {
             $query->where('whatsapp_status', $this->filterStatus);
@@ -136,10 +159,23 @@ class WhatsAppQueuePage extends Page
 
         $screenings = $query->paginate(15);
 
-        $totalScreenings = Screening::count();
-        $pendingCount = Screening::where('whatsapp_status', 'pending')->count();
-        $sentCount = Screening::where('whatsapp_status', 'sent')->count();
-        $companies = Company::pluck('name', 'id');
+        $totalQuery = Screening::query();
+        $scopeUser($totalQuery);
+        $totalScreenings = $totalQuery->count();
+
+        $pendingQuery = Screening::where('whatsapp_status', 'pending');
+        $scopeUser($pendingQuery);
+        $pendingCount = $pendingQuery->count();
+
+        $sentQuery = Screening::where('whatsapp_status', 'sent');
+        $scopeUser($sentQuery);
+        $sentCount = $sentQuery->count();
+
+        $companies = match (true) {
+            ! $user || $user->isAdmin() => Company::pluck('name', 'id'),
+            $user->isEmpresarial() => Company::where('id', $user->company_id)->pluck('name', 'id'),
+            default => collect(),
+        };
 
         return [
             'screenings' => $screenings,

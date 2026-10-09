@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 
 class ClientResource extends Resource
@@ -36,9 +37,21 @@ class ClientResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('company_id')
                             ->label('Empresa')
-                            ->relationship('company', 'name')
+                            ->relationship('company', 'name', modifyQueryUsing: function (Builder $query) {
+                                $user = auth()->user();
+                                if (! $user || $user->isAdmin()) {
+                                    return $query;
+                                }
+                                if ($user->isEmpresarial()) {
+                                    return $query->where('id', $user->company_id);
+                                }
+                                return $query->whereRaw('0 = 1');
+                            })
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->default(fn () => auth()->user()?->company_id)
+                            ->disabled(fn () => ! auth()->user()?->isAdmin())
+                            ->dehydrated(),
                         Forms\Components\TextInput::make('client_code')
                             ->label('Clave de Cliente')
                             ->disabled()
@@ -273,6 +286,22 @@ class ClientResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if (! $user || $user->isAdmin()) {
+            return $query;
+        }
+
+        if ($user->isEmpresarial()) {
+            return $query->where('company_id', $user->company_id);
+        }
+
+        return $query->where('user_id', $user->id);
     }
 
     public static function getPages(): array
