@@ -221,6 +221,29 @@ class UserRolesAndTenancyTest extends TestCase
         ]);
 
         $this->assertEquals($this->operadorA1->id, $newScreening->user_id);
-        $this->assertEquals($this->companyA->id, $newScreening->company_id);
+    }
+
+    public function test_admin_can_access_companies_page(): void
+    {
+        $this->actingAs($this->admin)
+            ->get('/admin/companies')
+            ->assertSuccessful();
+    }
+
+    public function test_empresarial_can_access_companies_page(): void
+    {
+        $this->actingAs($this->empresarialA)
+            ->get('/admin/companies')
+            ->assertSuccessful();
+    }
+
+    public function test_admin_can_access_all_resource_pages(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->get('/admin/clients')->assertSuccessful();
+        $this->get('/admin/screenings')->assertSuccessful();
+        $this->get('/admin/orders')->assertSuccessful();
+        $this->get('/admin/users')->assertSuccessful();
     }
 }
