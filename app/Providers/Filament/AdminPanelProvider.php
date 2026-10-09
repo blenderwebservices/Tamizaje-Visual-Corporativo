@@ -37,17 +37,26 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Cyan,
             ])
             ->navigationGroups([
+                'Acceso Rápido',
                 'Fase 1: Atracción y Registro',
                 'Fase 2: Tamizaje SpotVision',
                 'Fase 3: Envíos WhatsApp y Reportes',
                 'Fase 4: Cierre y CRM en Sitio',
                 'Fase 5: Retargeting y Automatización',
             ])
+            ->navigationItems([
+                \Filament\Navigation\NavigationItem::make('Ver Frontend (Web)')
+                    ->url('/')
+                    ->icon('heroicon-o-globe-alt')
+                    ->group('Acceso Rápido')
+                    ->sort(-10)
+                    ->openUrlInNewTab(),
+            ])
             ->maxContentWidth('full')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                \App\Filament\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

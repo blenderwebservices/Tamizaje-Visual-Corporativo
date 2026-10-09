@@ -60,12 +60,23 @@
                 </div>
             </div>
 
-            <!-- Derecha: Botón de Test y Métricas Rápidas -->
-            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3">
+            <!-- Derecha: Botón de Test y Enlace Directo al Frontend -->
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+                <x-filament::button
+                    tag="a"
+                    href="{{ url('/') }}"
+                    target="_blank"
+                    color="primary"
+                    icon="heroicon-m-arrow-top-right-on-square"
+                    size="sm"
+                >
+                    Ver Frontend (Landing & Fases)
+                </x-filament::button>
+
                 <x-filament::button
                     wire:click="testConnection"
                     wire:loading.attr="disabled"
-                    color="{{ $data['isConfigured'] ? 'primary' : 'gray' }}"
+                    color="{{ $data['isConfigured'] ? 'gray' : 'warning' }}"
                     icon="heroicon-m-signal"
                     size="sm"
                     outlined

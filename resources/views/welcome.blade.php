@@ -135,6 +135,24 @@
                                     <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
                                         Registro ultrarrápido desde el smartphone del colaborador mediante escaneo de código QR en el stand corporativo, eliminando filas y capturas manuales de datos.
                                     </p>
+
+                                    <!-- Infografía Ilustrativa Fase 1 -->
+                                    <div class="mt-4 mb-3 overflow-hidden rounded-2xl bg-white/95 border border-emerald-500/30 shadow-md p-2.5 sm:p-3 group/img cursor-pointer transition-all duration-300 hover:border-emerald-500/70 hover:shadow-lg hover:shadow-emerald-500/10" onclick="openPhaseModal('{{ asset('images/phases/fase1.png') }}', 'Fase 01: Atracción y Captura de Datos (El Intercambio)')">
+                                        <div class="relative overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                            <img
+                                                src="{{ asset('images/phases/fase1.png') }}"
+                                                alt="Ilustración Fase 1: Atracción y Captura de Datos"
+                                                class="w-full max-h-56 sm:max-h-64 object-contain transition-transform duration-300 group-hover/img:scale-105"
+                                                loading="lazy"
+                                            >
+                                            <div class="absolute inset-0 bg-slate-950/0 group-hover/img:bg-slate-950/20 transition-all flex items-end justify-end p-2 pointer-events-none">
+                                                <span class="opacity-0 group-hover/img:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-emerald-300 shadow-md flex items-center gap-1 backdrop-blur-sm border border-emerald-500/30">
+                                                    🔍 Ampliar diagrama
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
                                         <div class="flex items-center gap-2">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
@@ -199,6 +217,24 @@
                                     <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
                                         Evaluación refractiva binocular con autorrefractómetro Welch Allyn Spot Vision Screener. Carga por USB de PDFs y análisis óptico automatizado.
                                     </p>
+
+                                    <!-- Infografía Ilustrativa Fase 2 -->
+                                    <div class="mt-4 mb-3 overflow-hidden rounded-2xl bg-white/95 border border-teal-500/30 shadow-md p-2.5 sm:p-3 group/img cursor-pointer transition-all duration-300 hover:border-teal-500/70 hover:shadow-lg hover:shadow-teal-500/10" onclick="openPhaseModal('{{ asset('images/phases/fase2.png') }}', 'Fase 02: Tamizaje Visual con Spot Vision (La Experiencia)')">
+                                        <div class="relative overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                            <img
+                                                src="{{ asset('images/phases/fase2.png') }}"
+                                                alt="Ilustración Fase 2: Tamizaje Visual con Spot Vision"
+                                                class="w-full max-h-56 sm:max-h-64 object-contain transition-transform duration-300 group-hover/img:scale-105"
+                                                loading="lazy"
+                                            >
+                                            <div class="absolute inset-0 bg-slate-950/0 group-hover/img:bg-slate-950/20 transition-all flex items-end justify-end p-2 pointer-events-none">
+                                                <span class="opacity-0 group-hover/img:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-teal-300 shadow-md flex items-center gap-1 backdrop-blur-sm border border-teal-500/30">
+                                                    🔍 Ampliar diagrama
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
                                         <div class="flex items-center gap-2">
                                             <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
@@ -247,6 +283,24 @@
                                     <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
                                         Análisis clínico inmediato con semáforo de riesgo visual y despacho automático del reporte interactivo con enlace personalizado a WhatsApp en un clic.
                                     </p>
+
+                                    <!-- Infografía Ilustrativa Fase 3 -->
+                                    <div class="mt-4 mb-3 overflow-hidden rounded-2xl bg-white/95 border border-cyan-500/30 shadow-md p-2.5 sm:p-3 group/img cursor-pointer transition-all duration-300 hover:border-cyan-500/70 hover:shadow-lg hover:shadow-cyan-500/10" onclick="openPhaseModal('{{ asset('images/phases/fase3.png') }}', 'Fase 03: Entrega Digital y Asesoría Breve (El Gancho)')">
+                                        <div class="relative overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                            <img
+                                                src="{{ asset('images/phases/fase3.png') }}"
+                                                alt="Ilustración Fase 3: Entrega Digital y Asesoría Breve"
+                                                class="w-full max-h-56 sm:max-h-64 object-contain transition-transform duration-300 group-hover/img:scale-105"
+                                                loading="lazy"
+                                            >
+                                            <div class="absolute inset-0 bg-slate-950/0 group-hover/img:bg-slate-950/20 transition-all flex items-end justify-end p-2 pointer-events-none">
+                                                <span class="opacity-0 group-hover/img:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-cyan-300 shadow-md flex items-center gap-1 backdrop-blur-sm border border-cyan-500/30">
+                                                    🔍 Ampliar diagrama
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
                                         <div class="flex items-center gap-2">
                                             <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
@@ -311,6 +365,24 @@
                                     <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
                                         Canalización inmediata de colaboradores con alteraciones visuales. Selección de armazones oftálmicos, micas con filtro azul o lentes de seguridad graduados.
                                     </p>
+
+                                    <!-- Infografía Ilustrativa Fase 4 -->
+                                    <div class="mt-4 mb-3 overflow-hidden rounded-2xl bg-white/95 border border-amber-500/30 shadow-md p-2.5 sm:p-3 group/img cursor-pointer transition-all duration-300 hover:border-amber-500/70 hover:shadow-lg hover:shadow-amber-500/10" onclick="openPhaseModal('{{ asset('images/phases/fase4.png') }}', 'Fase 04: Cierre en Sitio o Etiquetado en CRM (La Clasificación)')">
+                                        <div class="relative overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                            <img
+                                                src="{{ asset('images/phases/fase4.png') }}"
+                                                alt="Ilustración Fase 4: Cierre en Sitio o Etiquetado en CRM"
+                                                class="w-full max-h-56 sm:max-h-64 object-contain transition-transform duration-300 group-hover/img:scale-105"
+                                                loading="lazy"
+                                            >
+                                            <div class="absolute inset-0 bg-slate-950/0 group-hover/img:bg-slate-950/20 transition-all flex items-end justify-end p-2 pointer-events-none">
+                                                <span class="opacity-0 group-hover/img:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-amber-300 shadow-md flex items-center gap-1 backdrop-blur-sm border border-amber-500/30">
+                                                    🔍 Ampliar diagrama
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
                                         <div class="flex items-center gap-2">
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
@@ -359,6 +431,24 @@
                                     <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
                                         Secuencia inteligente programada por WhatsApp para prospectos no compradores, reactivando el interés mediante promociones y recordatorios clínicos.
                                     </p>
+
+                                    <!-- Infografía Ilustrativa Fase 5 -->
+                                    <div class="mt-4 mb-3 overflow-hidden rounded-2xl bg-white/95 border border-indigo-500/30 shadow-md p-2.5 sm:p-3 group/img cursor-pointer transition-all duration-300 hover:border-indigo-500/70 hover:shadow-lg hover:shadow-indigo-500/10" onclick="openPhaseModal('{{ asset('images/phases/fase5.png') }}', 'Fase 05: Retargeting y Automatización (El Seguimiento)')">
+                                        <div class="relative overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                                            <img
+                                                src="{{ asset('images/phases/fase5.png') }}"
+                                                alt="Ilustración Fase 5: Retargeting y Automatización"
+                                                class="w-full max-h-56 sm:max-h-64 object-contain transition-transform duration-300 group-hover/img:scale-105"
+                                                loading="lazy"
+                                            >
+                                            <div class="absolute inset-0 bg-slate-950/0 group-hover/img:bg-slate-950/20 transition-all flex items-end justify-end p-2 pointer-events-none">
+                                                <span class="opacity-0 group-hover/img:opacity-100 transition-opacity px-2.5 py-1 rounded-lg bg-slate-900/90 text-[10px] font-bold text-indigo-300 shadow-md flex items-center gap-1 backdrop-blur-sm border border-indigo-500/30">
+                                                    🔍 Ampliar diagrama
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
                                         <div class="flex items-center gap-2">
                                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
@@ -405,5 +495,82 @@
     <footer class="border-t border-slate-900 py-6 px-6 text-center text-xs text-slate-600">
         Plataforma adaptada a las directivas de seguridad de <code class="text-slate-400">AuditoriaDeSeguridad.md</code> y <code class="text-slate-400">docs/AGENTS.md</code>.
     </footer>
+
+    <!-- Modal Lightbox para Ampliar Infografías de las Fases -->
+    <div id="phaseImageModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="phaseModalTitle">
+        <div class="relative max-w-2xl w-full bg-slate-900 border border-slate-700 rounded-3xl p-4 sm:p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <h4 id="phaseModalTitle" class="text-sm sm:text-base font-bold text-white tracking-wide">
+                        Diagrama de Fase
+                    </h4>
+                </div>
+                <button
+                    type="button"
+                    onclick="closePhaseModal()"
+                    class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm font-black transition"
+                    aria-label="Cerrar modal"
+                >
+                    ✕
+                </button>
+            </div>
+            <div class="flex-1 overflow-auto py-3 flex items-center justify-center bg-slate-950/60 rounded-2xl my-3 p-2 sm:p-4 border border-slate-800/80">
+                <img
+                    id="phaseModalImage"
+                    src=""
+                    alt="Diagrama ampliado de la fase"
+                    class="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-lg bg-white p-2"
+                >
+            </div>
+            <div class="pt-1 flex items-center justify-between text-xs text-slate-400">
+                <span>Esquema gráfico del flujo operativo de tamizaje</span>
+                <button
+                    type="button"
+                    onclick="closePhaseModal()"
+                    class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold transition text-xs"
+                >
+                    Cerrar (Esc)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openPhaseModal(imageSrc, title) {
+            const modal = document.getElementById('phaseImageModal');
+            const modalImg = document.getElementById('phaseModalImage');
+            const modalTitle = document.getElementById('phaseModalTitle');
+
+            if (!modal || !modalImg || !modalTitle) return;
+
+            modalImg.src = imageSrc;
+            modalTitle.textContent = title;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePhaseModal() {
+            const modal = document.getElementById('phaseImageModal');
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('phaseImageModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePhaseModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePhaseModal();
+            }
+        });
+    </script>
 </body>
 </html>
