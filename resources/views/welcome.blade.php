@@ -93,66 +93,308 @@
                 </div>
             </div>
 
-            <!-- Las 5 Fases del Bosquejo -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <!-- Fase 1 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between hover:border-slate-700 transition">
-                    <div>
-                        <span class="text-[11px] font-black text-emerald-400 uppercase tracking-wider block">Fase 1</span>
-                        <h3 class="text-base font-bold text-white mt-1">Atracción y Captura</h3>
-                        <p class="text-xs text-slate-400 mt-2">
-                            Formulario móvil en 10s con consentimiento legal garantizado y generación de ID Sujeto.
-                        </p>
+            <!-- Sección de Metodología y Timeline Vertical de 5 Fases -->
+            <div class="space-y-12">
+                <!-- Encabezado de la sección -->
+                <div class="text-center max-w-2xl mx-auto space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-emerald-400 text-xs font-semibold tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Flujo Operativo End-to-End
                     </div>
-                    <span class="text-2xl mt-4 block">📱</span>
+                    <h3 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        Metodología en 5 Fases
+                    </h3>
+                    <p class="text-sm sm:text-base text-slate-400">
+                        Un recorrido integral y automatizado desde el primer registro del colaborador en el corporativo hasta la fidelización y retargeting inteligente.
+                    </p>
                 </div>
 
-                <!-- Fase 2 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between hover:border-slate-700 transition">
-                    <div>
-                        <span class="text-[11px] font-black text-teal-400 uppercase tracking-wider block">Fase 2</span>
-                        <h3 class="text-base font-bold text-white mt-1">Tamizaje SpotVision</h3>
-                        <p class="text-xs text-slate-400 mt-2">
-                            Importación USB de PDFs, extracción de imagen de reporte, deduplicación de pacientes y OD/OS.
-                        </p>
-                    </div>
-                    <span class="text-2xl mt-4 block">🔬</span>
-                </div>
+                <!-- Timeline Vertical Responsivo -->
+                <div class="relative max-w-5xl mx-auto pt-4 pb-8">
+                    <!-- Línea Central del Timeline con Gradiente Luminoso -->
+                    <div class="absolute left-6 md:left-1/2 top-6 bottom-6 w-1 -translate-x-1/2 bg-gradient-to-b from-emerald-500 via-teal-400 via-cyan-400 via-amber-400 to-indigo-500 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.25)]"></div>
 
-                <!-- Fase 3 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between hover:border-slate-700 transition">
-                    <div>
-                        <span class="text-[11px] font-black text-cyan-400 uppercase tracking-wider block">Fase 3</span>
-                        <h3 class="text-base font-bold text-white mt-1">Entrega Digital</h3>
-                        <p class="text-xs text-slate-400 mt-2">
-                            Análisis rápido clínico y reporte con enlace personalizado disparado a WhatsApp en un clic.
-                        </p>
-                    </div>
-                    <span class="text-2xl mt-4 block">💬</span>
-                </div>
+                    <div class="space-y-12 md:space-y-16">
+                        <!-- FASE 1: Atracción y Captura (Izquierda en Desktop) -->
+                        <div class="relative flex flex-col md:flex-row items-start md:items-center group">
+                            <!-- Card (Desktop Izquierda) -->
+                            <div class="w-full md:w-1/2 pl-16 md:pl-0 md:pr-12">
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 relative overflow-hidden transition-all duration-300 hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-500/10 hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                                            Fase 01 • En Sitio & Móvil
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                                            ⏱️ ~10 seg
+                                        </span>
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">
+                                        Atracción y Captura Ágil
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                                        Registro ultrarrápido desde el smartphone del colaborador mediante escaneo de código QR en el stand corporativo, eliminando filas y capturas manuales de datos.
+                                    </p>
+                                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                                            <span>Formulario móvil ligero con validación de teléfono WhatsApp.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                                            <span>Consentimiento informado y aviso de privacidad legalmente garantizados.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                                            <span>Emisión de Pase Digital con UUID único y código de barras.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-3 flex items-center justify-between">
+                                        <a
+                                            href="{{ route('registration.form') }}"
+                                            class="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition group/btn"
+                                        >
+                                            <span>Simular Registro Móvil</span>
+                                            <span class="group-hover/btn:translate-x-1 transition-transform">→</span>
+                                        </a>
+                                        <span class="text-xl">📱</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Nodo Central -->
+                            <div class="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 md:-translate-y-1/2 z-10 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-950 border-2 border-emerald-500 shadow-lg shadow-emerald-500/40 flex items-center justify-center text-lg text-emerald-400 font-black group-hover:scale-110 transition-transform">
+                                    01
+                                </div>
+                            </div>
+                            <!-- Espaciador Desktop Derecha -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                        </div>
 
-                <!-- Fase 4 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between hover:border-slate-700 transition">
-                    <div>
-                        <span class="text-[11px] font-black text-amber-400 uppercase tracking-wider block">Fase 4</span>
-                        <h3 class="text-base font-bold text-white mt-1">Cierre en Sitio CRM</h3>
-                        <p class="text-xs text-slate-400 mt-2">
-                            Compra en lugar (Cliente Activo) o clasificación de prospecto para refracción y lentes de seguridad.
-                        </p>
-                    </div>
-                    <span class="text-2xl mt-4 block">🛒</span>
-                </div>
+                        <!-- FASE 2: Tamizaje SpotVision (Derecha en Desktop) -->
+                        <div class="relative flex flex-col md:flex-row items-start md:items-center group">
+                            <!-- Espaciador Desktop Izquierda -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                            <!-- Nodo Central -->
+                            <div class="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 md:-translate-y-1/2 z-10 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-950 border-2 border-teal-400 shadow-lg shadow-teal-500/40 flex items-center justify-center text-lg text-teal-400 font-black group-hover:scale-110 transition-transform">
+                                    02
+                                </div>
+                            </div>
+                            <!-- Card (Desktop Derecha) -->
+                            <div class="w-full md:w-1/2 pl-16 md:pl-12 md:pr-0">
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 relative overflow-hidden transition-all duration-300 hover:border-teal-400/50 hover:shadow-2xl hover:shadow-teal-500/10 hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-teal-500/20 transition-all"></div>
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-teal-500/15 border border-teal-500/30 text-teal-400">
+                                            Fase 02 • Equipamiento Médico
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                                            ⏱️ 5 seg / ojo
+                                        </span>
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-teal-300 transition-colors">
+                                        Tamizaje y Extracción SpotVision
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                                        Evaluación refractiva binocular con autorrefractómetro Welch Allyn Spot Vision Screener. Carga por USB de PDFs y análisis óptico automatizado.
+                                    </p>
+                                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
+                                            <span>Medición precisa de Esfera, Cilindro, Eje y Distancia Pupilar (OD/OS).</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
+                                            <span>Extracción y recorte automático de la gráfica/imagen del reporte impreso.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
+                                            <span>Deduplicación inteligente por Nombre, Folio e ID Sujeto.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-3 flex items-center justify-between">
+                                        <a
+                                            href="/admin/screenings"
+                                            class="inline-flex items-center gap-2 text-xs font-bold text-teal-400 hover:text-teal-300 transition group/btn"
+                                        >
+                                            <span>Ver Tamizajes Clínicos</span>
+                                            <span class="group-hover/btn:translate-x-1 transition-transform">→</span>
+                                        </a>
+                                        <span class="text-xl">🔬</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Fase 5 -->
-                <div class="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative overflow-hidden flex flex-col justify-between hover:border-slate-700 transition">
-                    <div>
-                        <span class="text-[11px] font-black text-indigo-400 uppercase tracking-wider block">Fase 5</span>
-                        <h3 class="text-base font-bold text-white mt-1">Retargeting</h3>
-                        <p class="text-xs text-slate-400 mt-2">
-                            Seguimiento programado: Día 3 (Catálogo), Día 15 (Cupón 20%), Día 90 (Examen clínico).
-                        </p>
+                        <!-- FASE 3: Entrega Digital (Izquierda en Desktop) -->
+                        <div class="relative flex flex-col md:flex-row items-start md:items-center group">
+                            <!-- Card (Desktop Izquierda) -->
+                            <div class="w-full md:w-1/2 pl-16 md:pl-0 md:pr-12">
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 relative overflow-hidden transition-all duration-300 hover:border-cyan-400/50 hover:shadow-2xl hover:shadow-cyan-500/10 hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-cyan-500/20 transition-all"></div>
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                                            Fase 03 • Comunicación Inmediata
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                                            ⚡ Instantáneo
+                                        </span>
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-cyan-300 transition-colors">
+                                        Entrega Digital y Reporte WhatsApp
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                                        Análisis clínico inmediato con semáforo de riesgo visual y despacho automático del reporte interactivo con enlace personalizado a WhatsApp en un clic.
+                                    </p>
+                                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
+                                            <span>Semáforo clínico tripartito: Normal, Sospechoso o Crítico.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
+                                            <span>Notificación WhatsApp con enlace seguro para el paciente.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
+                                            <span>Visualizador web responsivo con opción de descarga de PDF.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-3 flex items-center justify-between">
+                                        <a
+                                            href="/admin/whats-app-queue-page"
+                                            class="inline-flex items-center gap-2 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition group/btn"
+                                        >
+                                            <span>Bandeja de Envíos WhatsApp</span>
+                                            <span class="group-hover/btn:translate-x-1 transition-transform">→</span>
+                                        </a>
+                                        <span class="text-xl">💬</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Nodo Central -->
+                            <div class="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 md:-translate-y-1/2 z-10 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-950 border-2 border-cyan-400 shadow-lg shadow-cyan-500/40 flex items-center justify-center text-lg text-cyan-400 font-black group-hover:scale-110 transition-transform">
+                                    03
+                                </div>
+                            </div>
+                            <!-- Espaciador Desktop Derecha -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                        </div>
+
+                        <!-- FASE 4: Cierre en Sitio CRM (Derecha en Desktop) -->
+                        <div class="relative flex flex-col md:flex-row items-start md:items-center group">
+                            <!-- Espaciador Desktop Izquierda -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                            <!-- Nodo Central -->
+                            <div class="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 md:-translate-y-1/2 z-10 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-950 border-2 border-amber-400 shadow-lg shadow-amber-500/40 flex items-center justify-center text-lg text-amber-400 font-black group-hover:scale-110 transition-transform">
+                                    04
+                                </div>
+                            </div>
+                            <!-- Card (Desktop Derecha) -->
+                            <div class="w-full md:w-1/2 pl-16 md:pl-12 md:pr-0">
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 relative overflow-hidden transition-all duration-300 hover:border-amber-400/50 hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                                            Fase 04 • Conversión Comercial
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                                            🎯 Stand en Sitio
+                                        </span>
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-amber-300 transition-colors">
+                                        Cierre en Sitio y Gestión CRM
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                                        Canalización inmediata de colaboradores con alteraciones visuales. Selección de armazones oftálmicos, micas con filtro azul o lentes de seguridad graduados.
+                                    </p>
+                                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                            <span>Generación de orden comercial directa en sitio (Cliente Activo).</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                            <span>Catálogo óptico de seguridad industrial con descuento vía nómina.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                                            <span>Refracción fina complementaria en el consultorio móvil.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-3 flex items-center justify-between">
+                                        <a
+                                            href="/admin/orders"
+                                            class="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition group/btn"
+                                        >
+                                            <span>Módulo de Órdenes CRM</span>
+                                            <span class="group-hover/btn:translate-x-1 transition-transform">→</span>
+                                        </a>
+                                        <span class="text-xl">🛒</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 5: Retargeting y Automatización (Izquierda en Desktop) -->
+                        <div class="relative flex flex-col md:flex-row items-start md:items-center group">
+                            <!-- Card (Desktop Izquierda) -->
+                            <div class="w-full md:w-1/2 pl-16 md:pl-0 md:pr-12">
+                                <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-7 relative overflow-hidden transition-all duration-300 hover:border-indigo-400/50 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-500/20 transition-all"></div>
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+                                            Fase 05 • Fidelización Automatizada
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                                            🔄 3 a 90 días
+                                        </span>
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+                                        Retargeting y Drip Automático
+                                    </h4>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+                                        Secuencia inteligente programada por WhatsApp para prospectos no compradores, reactivando el interés mediante promociones y recordatorios clínicos.
+                                    </p>
+                                    <div class="mt-4 pt-4 border-t border-slate-800 space-y-2 text-xs text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
+                                            <span><strong>Día 3:</strong> Envío de catálogo digital de armazones y micas protectoras.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
+                                            <span><strong>Día 15:</strong> Cupón exclusivo del 20% de descuento corporativo.</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
+                                            <span><strong>Día 90:</strong> Recordatorio preventivo de chequeo visual anual.</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-3 flex items-center justify-between">
+                                        <a
+                                            href="/admin/retargeting-campaigns-page"
+                                            class="inline-flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition group/btn"
+                                        >
+                                            <span>Panel de Campañas Retargeting</span>
+                                            <span class="group-hover/btn:translate-x-1 transition-transform">→</span>
+                                        </a>
+                                        <span class="text-xl">🔄</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Nodo Central -->
+                            <div class="absolute left-6 md:left-1/2 -translate-x-1/2 top-6 md:top-1/2 md:-translate-y-1/2 z-10 flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-950 border-2 border-indigo-400 shadow-lg shadow-indigo-500/40 flex items-center justify-center text-lg text-indigo-400 font-black group-hover:scale-110 transition-transform">
+                                    05
+                                </div>
+                            </div>
+                            <!-- Espaciador Desktop Derecha -->
+                            <div class="hidden md:block md:w-1/2"></div>
+                        </div>
                     </div>
-                    <span class="text-2xl mt-4 block">🔄</span>
                 </div>
             </div>
 
