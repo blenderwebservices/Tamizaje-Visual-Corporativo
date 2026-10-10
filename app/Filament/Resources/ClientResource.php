@@ -4,12 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientResource\Pages;
 use App\Models\Client;
+use App\Models\Company;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -124,6 +126,50 @@ class ClientResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort(function (Builder $query): Builder {
+                return $query
+                    ->orderBy(
+                        Company::select('name')->whereColumn('companies.id', 'clients.company_id'),
+                        'asc'
+                    )
+                    ->orderBy('full_name', 'asc');
+            })
+            ->groups([
+                Group::make('company.name')
+                    ->label('Empresa')
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(fn (Client $record): string => $record->company?->name ?? 'Sin Empresa (Independiente)'),
+
+                Group::make('crm_stage')
+                    ->label('Clasificación CRM')
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(fn (Client $record): string => match ($record->crm_stage) {
+                        'purchased_onsite' => '🛒 Compra en Sitio (Activo)',
+                        'requires_glasses_pending' => '👓 Requiere Lentes (Sin Compra)',
+                        'pass_preventive' => '✅ Pasa (Preventivo)',
+                        'screened' => '🔬 Tamizado',
+                        'prospect' => '📋 Registrado',
+                        'lost' => '❌ Sin Interés',
+                        default => $record->crm_stage ?? 'Sin clasificar',
+                    }),
+
+                Group::make('has_whatsapp')
+                    ->label('Tiene WhatsApp')
+                    ->collapsible()
+                    ->titlePrefixedWithLabel(false)
+                    ->orderQueryUsing(fn (Builder $query, string $direction) => $query->orderByRaw("CASE WHEN phone IS NOT NULL AND phone != '' THEN 0 ELSE 1 END {$direction}"))
+                    ->groupQueryUsing(fn (Builder $query) => $query->groupByRaw("CASE WHEN phone IS NOT NULL AND phone != '' THEN 1 ELSE 0 END"))
+                    ->scopeQueryByKeyUsing(fn (Builder $query, string $key) => $key === 'yes'
+                        ? $query->whereNotNull('phone')->where('phone', '!=', '')
+                        : $query->where(fn ($q) => $q->whereNull('phone')->orWhere('phone', ''))
+                    )
+                    ->getKeyFromRecordUsing(fn (Client $record): string => !empty($record->phone) ? 'yes' : 'no')
+                    ->getTitleFromRecordUsing(fn (Client $record): string => !empty($record->phone) ? '📱 Con WhatsApp Registrado' : '⚠️ Sin WhatsApp / Teléfono')
+                    ->getDescriptionFromRecordUsing(fn (Client $record): string => !empty($record->phone) ? 'Colaboradores con número móvil listo para envío de reportes' : 'Colaboradores que requieren captura de número'),
+            ])
+            ->groupingSettingsInDropdownOnDesktop()
             ->columns([
                 Tables\Columns\TextColumn::make('subject_code')
                     ->label('ID Sujeto')
@@ -147,6 +193,7 @@ class ClientResource extends Resource
                 Tables\Columns\TextColumn::make('company.name')
                     ->label('Empresa')
                     ->searchable()
+                    ->sortable()
                     ->badge()
                     ->color('gray'),
                 Tables\Columns\TextColumn::make('crm_stage')
@@ -183,6 +230,15 @@ class ClientResource extends Resource
                         'pass_preventive' => 'Pasa - Sin Requerimiento',
                         'screened' => 'Tamizaje Realizado',
                     ]),
+                Tables\Filters\TernaryFilter::make('has_whatsapp')
+                    ->label('Tiene WhatsApp')
+                    ->placeholder('Todos')
+                    ->trueLabel('Con WhatsApp')
+                    ->falseLabel('Sin WhatsApp')
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNotNull('phone')->where('phone', '!=', ''),
+                        false: fn (Builder $query) => $query->where(fn ($q) => $q->whereNull('phone')->orWhere('phone', '')),
+                    ),
             ])
             ->actions([
                 Tables\Actions\Action::make('openWhatsApp')

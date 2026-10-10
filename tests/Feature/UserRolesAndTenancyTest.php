@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\ClientResource;
+use App\Filament\Resources\ClientResource\Pages\ListClients;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\ScreeningResource;
 use App\Filament\Resources\UserResource;
@@ -11,6 +12,7 @@ use App\Models\Company;
 use App\Models\Screening;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class UserRolesAndTenancyTest extends TestCase
@@ -245,5 +247,22 @@ class UserRolesAndTenancyTest extends TestCase
         $this->get('/admin/screenings')->assertSuccessful();
         $this->get('/admin/orders')->assertSuccessful();
         $this->get('/admin/users')->assertSuccessful();
+    }
+
+    public function test_clients_table_sorting_and_grouping(): void
+    {
+        Livewire::actingAs($this->admin)
+            ->test(ListClients::class)
+            ->assertCanSeeTableRecords([
+                $this->clientA1,
+                $this->clientA2,
+                $this->clientB1,
+            ])
+            ->set('tableGrouping', 'company.name')
+            ->assertSuccessful()
+            ->set('tableGrouping', 'crm_stage')
+            ->assertSuccessful()
+            ->set('tableGrouping', 'has_whatsapp')
+            ->assertSuccessful();
     }
 }
